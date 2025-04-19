@@ -1,0 +1,42 @@
+<resources>
+    <string name="app_name">Octopus</string>
+    <string name="navigation_drawer_open">Otwórz menu</string>
+    <string name="navigation_drawer_close">Zamknij menu</string>
+    <string-array name="rooms_array">
+        <item>Mała Sala</item>
+        <item>Duża Sala</item>
+    </string-array>
+    <string-array name="days_of_week">
+        <item>Poniedziałek</item>
+        <item>Wtorek</item>
+        <item>Środa</item>
+        <item>Czwartek</item>
+        <item>Piątek</item>
+        <item>Sobota</item>
+        <item>Niedziela</item>
+    </string-array>
+    <string-array name="class_types_array">
+        <item>MMA</item>
+        <item>Boks</item>
+        <item>Kick-boxing</item>
+        <item>Zapasy</item>
+        <item>No-Gi</item>
+        <item>BJJ</item>
+        <item>Wolna Mata</item>
+    </string-array>
+
+    <string-array name="group_levels_array">
+        <item>początkująca</item>
+        <item>kids (6 - 12 lat)</item>
+        <item>junior (12 - 16 lat)</item>
+        <item>family</item>
+        <item>średnio - zaawansowana</item>
+        <item>zaawansowana</item>
+        <item>pro</item>
+        <item>łączona</item>
+        <item>sparingi</item>
+    </string-array>
+
+        <item name="nav_logout" type="id"/>
+
+</resources>

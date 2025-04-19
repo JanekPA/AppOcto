@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/nav_login"
+        android:title="Zaloguj się"
+        android:visible="true"/>
+    <item android:id="@+id/nav_schedule"
+        android:title="Grafik zajęć" />
+    <item android:id="@+id/nav_pricing"
+        android:title="Cennik" />
+    <item android:id="@+id/nav_reservation"
+        android:title="Rezerwacje" />
+    <item android:id="@+id/nav_trainers"
+        android:title="Nasi Trenerzy" />
+    <item android:id="@+id/nav_settings"
+        android:title="Ustawienia" />
+    <item android:id="@+id/nav_help"
+        android:title="Pomoc i Kontakt" />
+    <item
+        android:id="@+id/nav_logout"
+        android:title="Wyloguj się"
+        android:visible="false" />
+</menu>

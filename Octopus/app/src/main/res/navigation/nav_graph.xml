@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/mainFragment">
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.example.octopus.MainFragment"
+        android:label="Octopus">
+
+        <action
+            android:id="@+id/action_mainFragment_to_scheduleFragment"
+            app:destination="@id/scheduleFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_pricingFragment"
+            app:destination="@id/pricingFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_reservationFragment"
+            app:destination="@id/reservationFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_helpFragment"
+            app:destination="@id/helpFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.octopus.LoginFragment"
+        android:label="Zaloguj się">
+        <action
+            android:id="@+id/action_loginFragment_to_registerFragment"
+            app:destination="@id/registerFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.example.octopus.RegisterFragment"
+        android:label="Zarejestruj się">
+        <action
+            android:id="@+id/action_registerFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_registerFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/scheduleFragment"
+        android:name="com.example.octopus.ScheduleFragment"
+        android:label="Grafik">
+        <action
+            android:id="@+id/action_scheduleFragment_to_editDescriptionFragment"
+            app:destination="@id/editDescriptionFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.octopus.com.example.octopus.SettingsFragment"
+        android:label="Ustawienia"
+        tools:layout="@layout/fragment_settings" />
+
+    <fragment
+        android:id="@+id/pricingFragment"
+        android:name="com.example.octopus.PricingFragment"
+        android:label="Cennik" />
+
+    <fragment
+        android:id="@+id/trainersFragment"
+        android:name="com.example.octopus.TrainersFragment"
+        android:label="Trenerzy" />
+
+    <fragment
+        android:id="@+id/reservationFragment"
+        android:name="com.example.octopus.ReservationFragment"
+        android:label="Rezerwacje" />
+
+    <fragment
+        android:id="@+id/helpFragment"
+        android:name="com.example.octopus.HelpFragment"
+        android:label="Pomoc i Kontakt" />
+
+    <fragment
+        android:id="@+id/editDescriptionFragment"
+        android:name="com.example.octopus.EditDescriptionFragment"
+        android:label="Opis zajęć">
+        <argument
+            android:name="day"
+            app:argType="string" />
+        <argument
+            android:name="time"
+            app:argType="string" />
+    </fragment>
+</navigation>

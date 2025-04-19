@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "930686059339",
+    "firebase_url": "https://octopusdb-9d3fc-default-rtdb.firebaseio.com",
+    "project_id": "octopusdb-9d3fc",
+    "storage_bucket": "octopusdb-9d3fc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:930686059339:android:ed720b67f9c2e09c365ece",
+        "android_client_info": {
+          "package_name": "com.example.octopus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1vjk80JzJwftxWz3owrTpTCHpeuVJzNw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

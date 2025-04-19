@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cardViewHour"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="6dp"
+    android:elevation="2dp"
+    android:radius="12dp">
+
+    <TextView
+        android:id="@+id/textViewHour"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="14dp"
+        android:text="10:00-11:00"
+        android:textSize="14sp"
+        android:textColor="@android:color/black" />
+</androidx.cardview.widget.CardView>

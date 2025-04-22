@@ -11,6 +11,9 @@
         android:title="Rezerwacje" />
     <item android:id="@+id/nav_trainers"
         android:title="Nasi Trenerzy" />
+    <item android:id="@+id/for_trainers"
+        android:title="Dla trenerów"
+        android:visible="false"/>
     <item android:id="@+id/nav_settings"
         android:title="Ustawienia" />
     <item android:id="@+id/nav_help"

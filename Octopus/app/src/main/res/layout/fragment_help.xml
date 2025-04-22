@@ -1,12 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/helpFragmentLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center">
+    android:orientation="vertical"
+    android:padding="16dp">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <!-- FAQ List (70%) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/faqRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="7"
+        android:clipToPadding="false"
+        android:paddingBottom="8dp"
+        android:scrollbars="vertical" />
+    <Button
+        android:id="@+id/buttonAddQuestion"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Ekran pomocy i kontaktu"
-        android:textSize="24sp"/>
-</FrameLayout>
+        android:text="Dodaj pytanie"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Contact Section (30%) -->
+    <LinearLayout
+        android:id="@+id/contactSection"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:orientation="vertical"
+        android:background="@android:color/darker_gray"
+        android:padding="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Masz pytania? Skontaktuj się z nami!"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <LinearLayout
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_baseline_call_24"
+                android:layout_marginEnd="7dp" />
+
+            <TextView
+                android:id="@+id/phoneContact"
+                android:text="Numer kontaktowy"
+                android:textSize="17sp"
+                android:textColor="@android:color/holo_blue_dark"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/gmail_icon"
+                android:layout_marginEnd="7dp" /> />
+
+            <TextView
+                android:id="@+id/mailContact"
+                android:text="Email:"
+                android:textSize="17sp"
+                android:textColor="@android:color/holo_blue_dark"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content" />
+
+        </LinearLayout>
+        <LinearLayout
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/fb_icon"
+                android:layout_marginEnd="7dp" />
+
+            <TextView
+                android:id="@+id/fbContact"
+                android:text="Facebook"
+                android:textSize="17sp"
+                android:textColor="@android:color/holo_blue_dark"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/instagram_icon"
+                android:layout_marginEnd="7dp" />
+
+            <TextView
+                android:id="@+id/instagramContact"
+                android:text="Instagram"
+                android:textSize="17sp"
+                android:textColor="@android:color/holo_blue_dark"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

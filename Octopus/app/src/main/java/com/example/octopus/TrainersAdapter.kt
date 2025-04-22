@@ -19,7 +19,6 @@ class TrainersAdapter(
     inner class TrainerViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val nameTextView: TextView = itemView.findViewById(R.id.textViewTrainerName)
         val typesTextView: TextView = itemView.findViewById(R.id.textViewTrainerTypes)
-        val levelsTextView: TextView = itemView.findViewById(R.id.textViewTrainerLevels)
         val cardView: CardView = itemView.findViewById(R.id.cardViewTrainer)
     }
 
@@ -33,7 +32,6 @@ class TrainersAdapter(
         val trainer = trainers[position]
         holder.nameTextView.text = "${trainer.name} ${trainer.surname}"
         holder.typesTextView.text = "Zajęcia: ${trainer.classTypes.joinToString(", ")}"
-        holder.levelsTextView.text = "Poziomy: ${trainer.groupLevels.joinToString(", ")}"
 
         holder.cardView.setOnClickListener {
             selectedPosition = position

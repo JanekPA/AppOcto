@@ -36,7 +36,29 @@
         <item>łączona</item>
         <item>sparingi</item>
     </string-array>
+    <string-array name="item_types">
+        <item>Sprzęt</item>
+        <item>Ubranie</item>
+        <item>Akcesoria</item>
+    </string-array>
+    <string-array name="item_type_options">
+        <item>Dziecięcy</item>
+        <item>Dorosły - Damski</item>
+        <item>Dorosły - Męski</item>
+    </string-array>
+
+    <string-array name="item_size_options">
+        <item>XS</item>
+        <item>S</item>
+        <item>M</item>
+        <item>L</item>
+        <item>XL</item>
+        <item>XXL</item>
+    </string-array>
+    <string-array name="payment_methods">
+        <item>Gotówka</item>
+    </string-array>
 
         <item name="nav_logout" type="id"/>
-
+    <string name="payment_prompt">Opcja płatności</string>
 </resources>

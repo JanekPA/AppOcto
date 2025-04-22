@@ -10,6 +10,9 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.*
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class TrainersFragment : Fragment() {
 
@@ -45,6 +48,9 @@ class TrainersFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_trainers, container, false)
         val addTrainerButton: Button = view.findViewById(R.id.buttonAddTrainer)
         val addHoursButton: Button = view.findViewById(R.id.addHoursButton);
+        val editTrainerButton: Button = view.findViewById(R.id.editTrainerButton)
+        editTrainerButton.visibility = View.GONE
+
         addTrainerButton.setOnClickListener {
             showAddTrainerDialog()
         }
@@ -244,11 +250,22 @@ class TrainersFragment : Fragment() {
                     val availabilityRef = database.getReference("scheduleTrainers").child(child.key!!)
                     availabilityRef.addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(avSnapshot: DataSnapshot) {
+                            val formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
                             val availability = mutableMapOf<String, List<String>>()
+
                             for (day in avSnapshot.children) {
                                 val hours = day.children.mapNotNull { it.getValue(String::class.java) }
+                                    .distinct()
+                                    .sortedBy {
+                                        try {
+                                            LocalTime.parse(it, formatter)
+                                        } catch (e: Exception) {
+                                            LocalTime.MIDNIGHT // domyślnie sortuj nieparsowalne na początek
+                                        }
+                                    }
                                 availability[day.key!!] = hours
                             }
+
 
                             filteredList.add(Trainer(name, surname, contact, availability, types, levels))
                             loadedCount++
@@ -273,11 +290,117 @@ class TrainersFragment : Fragment() {
 
 
 
+    private fun showEditTrainerDialog(trainer: Trainer) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_add_trainer, null)
+        val nameInput = dialogView.findViewById<EditText>(R.id.editTextName)
+        val surnameInput = dialogView.findViewById<EditText>(R.id.editTextSurname)
+        val phoneInput = dialogView.findViewById<EditText>(R.id.editTextPhone)
+        val emailInput = dialogView.findViewById<EditText>(R.id.editTextEmail)
+        val facebookInput = dialogView.findViewById<EditText>(R.id.editTextFacebook)
+        val instagramInput = dialogView.findViewById<EditText>(R.id.editTextInstagram)
+        val classTypesText = dialogView.findViewById<TextView>(R.id.textViewClassTypes)
+        val groupLevelsText = dialogView.findViewById<TextView>(R.id.textViewGroupLevels)
+
+        // Wstępne dane
+        nameInput.setText(trainer.name)
+        surnameInput.setText(trainer.surname)
+
+        val lines = trainer.contact.split("\n")
+        phoneInput.setText(lines.getOrNull(0)?.removePrefix("📞 ") ?: "")
+        emailInput.setText(lines.getOrNull(1)?.removePrefix("✉️ ") ?: "")
+        facebookInput.setText(lines.getOrNull(2)?.removePrefix("📘 ") ?: "")
+        instagramInput.setText(lines.getOrNull(3)?.removePrefix("📸 ") ?: "")
+
+        val selectedTypes = trainer.classTypes.toMutableList()
+        val selectedLevels = trainer.groupLevels.toMutableList()
+
+        val types = mutableListOf<String>()
+        val levels = mutableListOf<String>()
+
+        classTypesRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                types.addAll(snapshot.children.mapNotNull { it.getValue(String::class.java) })
+                val selectedItemsTypes = types.map { it in selectedTypes }.toBooleanArray()
+
+                classTypesText.text = selectedTypes.joinToString(", ")
+
+                classTypesText.setOnClickListener {
+                    AlertDialog.Builder(requireContext())
+                        .setTitle("Wybierz typy zajęć")
+                        .setMultiChoiceItems(types.toTypedArray(), selectedItemsTypes) { _, which, isChecked ->
+                            if (isChecked) selectedTypes.add(types[which]) else selectedTypes.remove(types[which])
+                        }
+                        .setPositiveButton("OK") { _, _ ->
+                            classTypesText.text = selectedTypes.joinToString(", ")
+                        }
+                        .show()
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {}
+        })
+
+        groupLevelsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                levels.addAll(snapshot.children.mapNotNull { it.getValue(String::class.java) })
+                val selectedItemsLevels = levels.map { it in selectedLevels }.toBooleanArray()
+
+                groupLevelsText.text = selectedLevels.joinToString(", ")
+
+                groupLevelsText.setOnClickListener {
+                    AlertDialog.Builder(requireContext())
+                        .setTitle("Wybierz poziomy grup")
+                        .setMultiChoiceItems(levels.toTypedArray(), selectedItemsLevels) { _, which, isChecked ->
+                            if (isChecked) selectedLevels.add(levels[which]) else selectedLevels.remove(levels[which])
+                        }
+                        .setPositiveButton("OK") { _, _ ->
+                            groupLevelsText.text = selectedLevels.joinToString(", ")
+                        }
+                        .show()
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {}
+        })
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Edytuj dane trenera")
+            .setView(dialogView)
+            .setPositiveButton("Zapisz") { _, _ ->
+                val key = "${trainer.name} ${trainer.surname}"
+                val newName = nameInput.text.toString()
+                val newSurname = surnameInput.text.toString()
+                val newKey = "$newName $newSurname"
+
+                val updatedData = mapOf(
+                    "name" to newName,
+                    "surname" to newSurname,
+                    "phoneNumber" to phoneInput.text.toString(),
+                    "email" to emailInput.text.toString(),
+                    "facebook" to facebookInput.text.toString(),
+                    "instagram" to instagramInput.text.toString(),
+                    "classTypes" to selectedTypes,
+                    "groupLevels" to selectedLevels
+                )
+
+                // Usuń starego i zapisz pod nowym kluczem (jeśli klucz się zmienił)
+                if (key != newKey) {
+                    trainersRef.child(key).removeValue()
+                }
+                trainersRef.child(newKey).setValue(updatedData)
+
+                Toast.makeText(requireContext(), "Dane zaktualizowane!", Toast.LENGTH_SHORT).show()
+                loadTrainers()
+            }
+            .setNegativeButton("Anuluj", null)
+            .show()
+    }
 
 
 
     private fun setupTrainerRecycler(trainers: List<Trainer>) {
         val addHoursButton: Button = requireView().findViewById(R.id.addHoursButton)
+        val editTrainerButton: Button = requireView().findViewById(R.id.editTrainerButton)
 
         trainersAdapter = TrainersAdapter(trainers) { trainer ->
             selectedTrainer = trainer
@@ -285,14 +408,21 @@ class TrainersFragment : Fragment() {
             updateAvailableHours()
 
             addHoursButton.visibility = View.VISIBLE
+            editTrainerButton.visibility = View.VISIBLE
+
             addHoursButton.setOnClickListener {
                 showAddHoursDialog(trainer)
+            }
+
+            editTrainerButton.setOnClickListener {
+                showEditTrainerDialog(trainer)
             }
         }
 
         trainersRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         trainersRecyclerView.adapter = trainersAdapter
     }
+
 
     private fun showAddHoursDialog(trainer: Trainer) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_add_hours, null)
@@ -321,6 +451,7 @@ class TrainersFragment : Fragment() {
                                 scheduleRef.setValue(updatedMap)
                                 Toast.makeText(requireContext(), "Godzina dodana!", Toast.LENGTH_SHORT).show()
                                 updateAvailableHours()
+                                loadTrainers()
                             } else {
                                 Toast.makeText(requireContext(), "Godzina już istnieje.", Toast.LENGTH_SHORT).show()
                             }

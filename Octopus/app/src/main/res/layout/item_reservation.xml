@@ -1,0 +1,25 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/itemNameText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Przedmiot"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/quantityText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ilość" />
+
+    <TextView
+        android:id="@+id/paymentText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Płatność" />
+</LinearLayout>

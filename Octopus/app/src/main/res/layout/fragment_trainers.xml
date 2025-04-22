@@ -124,7 +124,13 @@
             android:text="Dodaj godziny"
             android:visibility="gone"
             android:layout_margin="8dp" />
-
+        <Button
+            android:id="@+id/editTrainerButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edytuj trenera"
+            android:visibility="gone"
+            android:layout_margin="8dp" />
     </LinearLayout>
 
 </ScrollView>

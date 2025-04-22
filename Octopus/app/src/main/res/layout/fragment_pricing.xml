@@ -1,13 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Cennik"
-        android:textSize="24sp"/>
-</LinearLayout>
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:gravity="center_horizontal">
+
+        <!-- Obraz cennika -->
+        <ImageView
+            android:id="@+id/pricingImage"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:src="@mipmap/octopus_cennik"
+            android:scaleType="centerCrop"
+            android:contentDescription="Obraz cennika" />
+
+        <!-- Opis kontaktowy -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Jeśli masz jakieś dodatkowe pytania bądź znajdujesz coś niejasnego - skontaktuj się z nami!"
+            android:layout_marginTop="24dp"
+            android:textSize="16sp"
+            android:textAlignment="center" />
+
+        <!-- Linki dynamiczne -->
+        <TextView
+            android:id="@+id/contactPhone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📞 Numer kontaktowy"
+            android:textColor="#0000EE"
+            android:textSize="16sp"
+            android:layout_marginTop="24dp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="16dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/gmail_icon"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="Gmail icon" />
+
+            <TextView
+                android:id="@+id/contactMail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Email"
+                android:textColor="#0000EE"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+        <!-- Facebook z ikoną -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="16dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/fb_icon"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="Facebook Icon" />
+
+            <TextView
+                android:id="@+id/contactFacebook"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Facebook"
+                android:textColor="#0000EE"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+        <!-- Instagram z ikoną -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="16dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/instagram_icon"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="Instagram Icon" />
+
+            <TextView
+                android:id="@+id/contactInstagram"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Instagram"
+                android:textColor="#0000EE"
+                android:textSize="16sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

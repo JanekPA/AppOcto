@@ -1,18 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:padding="16dp"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <Spinner
-        android:id="@+id/spinnerDayDialog"
+    <Button
+        android:id="@+id/buttonPickDate"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="Wybierz datę" />
 
     <EditText
         android:id="@+id/editTextHour"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Wprowadź godzinę (np. 10:00)" />
+        android:hint="Dodaj godzinę (HH:MM)"
+        android:inputType="time" />
+
+    <Button
+        android:id="@+id/buttonAddHour"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Dodaj godzinę" />
+
+    <ListView
+        android:id="@+id/listViewHours"
+        android:layout_width="match_parent"
+        android:layout_height="150dp" />
 </LinearLayout>

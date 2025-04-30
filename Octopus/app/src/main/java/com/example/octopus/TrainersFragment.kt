@@ -1,6 +1,8 @@
 package com.example.octopus
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,72 +12,77 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.*
+import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.Calendar
 import java.util.Locale
 
 class TrainersFragment : Fragment() {
 
     private lateinit var trainingTypeSpinner: Spinner
     private lateinit var groupLevelSpinner: Spinner
-    private lateinit var daySpinner: Spinner
     private lateinit var trainersRecyclerView: RecyclerView
     private lateinit var hoursRecyclerView: RecyclerView
     private lateinit var reserveButton: Button
     private lateinit var contactTextView: TextView
-
+    private lateinit var pickDateButton: Button
     private lateinit var database: FirebaseDatabase
     private lateinit var classTypesRef: DatabaseReference
     private lateinit var groupLevelsRef: DatabaseReference
     private lateinit var trainersRef: DatabaseReference
+    private lateinit var scheduleRef: DatabaseReference
 
     private var selectedTrainer: Trainer? = null
-    private var selectedDay: String = ""
+    private var selectedDate: String = LocalDate.now().format(DateTimeFormatter.ISO_DATE) // domyślnie dziś
     private var selectedHour: String? = null
 
     private lateinit var trainersAdapter: TrainersAdapter
     private lateinit var hoursAdapter: HoursAdapter
 
-    private val daysOfWeek = listOf(
-        "Poniedziałek", "Wtorek", "Środa", "Czwartek",
-        "Piątek", "Sobota", "Niedziela"
-    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         val view = inflater.inflate(R.layout.fragment_trainers, container, false)
+
         val addTrainerButton: Button = view.findViewById(R.id.buttonAddTrainer)
-        val addHoursButton: Button = view.findViewById(R.id.addHoursButton);
         val editTrainerButton: Button = view.findViewById(R.id.editTrainerButton)
         editTrainerButton.visibility = View.GONE
 
-        addTrainerButton.setOnClickListener {
-            showAddTrainerDialog()
-        }
         trainingTypeSpinner = view.findViewById(R.id.spinnerTrainingType)
         groupLevelSpinner = view.findViewById(R.id.spinnerGroupLevel)
-        daySpinner = view.findViewById(R.id.spinnerDay)
         trainersRecyclerView = view.findViewById(R.id.recyclerViewTrainers)
         hoursRecyclerView = view.findViewById(R.id.recyclerViewAvailableHours)
         reserveButton = view.findViewById(R.id.buttonReserve)
         contactTextView = view.findViewById(R.id.textViewContact)
-
-        reserveButton.isEnabled = false
+        pickDateButton = view.findViewById(R.id.buttonPickDate)
 
         database = FirebaseDatabase.getInstance()
         classTypesRef = database.getReference("classTypes")
         groupLevelsRef = database.getReference("groupLevelsTrainers")
         trainersRef = database.getReference("TrainersData")
+        scheduleRef = database.getReference("scheduleTrainers")
+
+        reserveButton.isEnabled = false
 
         setupSpinners()
         loadClassTypes()
         loadGroupLevels()
         loadTrainers()
 
+        addTrainerButton.setOnClickListener { showAddTrainerDialog() }
+        editTrainerButton.setOnClickListener {
+            selectedTrainer?.let { showEditTrainerDialog(it) }
+        }
+
         reserveButton.setOnClickListener {
             Toast.makeText(requireContext(), "Rezerwacja w przygotowaniu", Toast.LENGTH_SHORT).show()
+        }
+
+        pickDateButton.setOnClickListener {
+            showDatePickerDialog()
         }
 
         return view
@@ -104,7 +111,6 @@ class TrainersFragment : Fragment() {
                 types.addAll(snapshot.children.mapNotNull { it.getValue(String::class.java) })
                 val selectedItemsTypes = BooleanArray(types.size) // ← dodaj to
                 classTypesText.setOnClickListener {
-                    val selectedItems = BooleanArray(types.size)
                     AlertDialog.Builder(requireContext())
                         .setTitle("Wybierz typy zajęć")
                         .setMultiChoiceItems(types.toTypedArray(), selectedItemsTypes) { _, which, isChecked ->
@@ -125,7 +131,6 @@ class TrainersFragment : Fragment() {
                 levels.addAll(snapshot.children.mapNotNull { it.getValue(String::class.java) })
                 val selectedItemsLevels = BooleanArray(levels.size) // ← dodaj to
                 groupLevelsText.setOnClickListener {
-                    val selectedItems = BooleanArray(levels.size)
                     AlertDialog.Builder(requireContext())
                         .setTitle("Wybierz poziomy zaawansowania")
                         .setMultiChoiceItems(levels.toTypedArray(), selectedItemsLevels) { _, which, isChecked ->
@@ -171,27 +176,54 @@ class TrainersFragment : Fragment() {
 
 
     private fun setupSpinners() {
-        daySpinner.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, daysOfWeek)
-        daySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) {
-                selectedDay = daysOfWeek[pos]
-                updateAvailableHours()
-            }
-            override fun onNothingSelected(p: AdapterView<*>?) {}
-        }
-
-        val refreshTrainers = object : AdapterView.OnItemSelectedListener {
+        val refreshTrainersListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) {
                 loadTrainers()
             }
             override fun onNothingSelected(p: AdapterView<*>?) {}
         }
 
-        trainingTypeSpinner.onItemSelectedListener = refreshTrainers
-        groupLevelSpinner.onItemSelectedListener = refreshTrainers
+        trainingTypeSpinner.onItemSelectedListener = refreshTrainersListener
+        groupLevelSpinner.onItemSelectedListener = refreshTrainersListener
     }
+    private fun showDatePickerDialog() {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
 
+        val datePickerDialog = DatePickerDialog(
+            requireContext(),
+            { _, selectedYear, selectedMonth, selectedDayOfMonth ->
 
+                val localDate = LocalDate.of(selectedYear, selectedMonth + 1, selectedDayOfMonth)
+                selectedDate = localDate.format(DateTimeFormatter.ISO_DATE) // pasuje do Firebase
+                pickDateButton.text = localDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) // ładne wyświetlanie
+                // Załaduj dostępne godziny na wybraną datę
+                selectedTrainer?.let { trainer ->
+                    loadAvailableHoursForDate(trainer, selectedDate)
+                }
+            },
+            year, month, day
+        )
+        datePickerDialog.show()
+    }
+    private fun loadAvailableHoursForDate(trainer: Trainer, date: String) {
+        val trainerKey = "${trainer.name} ${trainer.surname}"
+
+        scheduleRef.child(trainerKey).child(date).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val hours = snapshot.children.mapNotNull { it.getValue(String::class.java) }
+                hoursAdapter = HoursAdapter(hours) { hour ->
+                    selectedHour = hour
+                    reserveButton.isEnabled = true
+                }
+                hoursRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+                hoursRecyclerView.adapter = hoursAdapter
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
     private fun loadClassTypes() {
         classTypesRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -215,6 +247,12 @@ class TrainersFragment : Fragment() {
     }
 
     private fun loadTrainers() {
+        // Resetuj wcześniej wybranego trenera i godziny
+        selectedTrainer = null
+        selectedHour = null
+        contactTextView.text = "Wybierz trenera, aby uzyskać kontakt!"
+        hoursRecyclerView.adapter = null
+        reserveButton.isEnabled = false
         val selectedType = trainingTypeSpinner.selectedItem?.toString()?.trim()
         val selectedLevel = groupLevelSpinner.selectedItem?.toString()?.trim()
 
@@ -253,17 +291,18 @@ class TrainersFragment : Fragment() {
                             val formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
                             val availability = mutableMapOf<String, List<String>>()
 
-                            for (day in avSnapshot.children) {
-                                val hours = day.children.mapNotNull { it.getValue(String::class.java) }
+                            for (dateSnapshot in avSnapshot.children) {
+                                val date = dateSnapshot.key ?: continue
+                                val hours = dateSnapshot.children.mapNotNull { it.getValue(String::class.java) }
                                     .distinct()
                                     .sortedBy {
                                         try {
                                             LocalTime.parse(it, formatter)
                                         } catch (e: Exception) {
-                                            LocalTime.MIDNIGHT // domyślnie sortuj nieparsowalne na początek
+                                            LocalTime.MIDNIGHT
                                         }
                                     }
-                                availability[day.key!!] = hours
+                                availability[date] = hours
                             }
 
 
@@ -271,7 +310,19 @@ class TrainersFragment : Fragment() {
                             loadedCount++
                             if (loadedCount == filteredChildren.size) {
                                 setupTrainerRecycler(filteredList)
+                                val stillExists = filteredList.any {
+                                    it.name == selectedTrainer?.name && it.surname == selectedTrainer?.surname
+                                }
+                                if (!stillExists) {
+                                    selectedTrainer = null
+                                    selectedHour = null
+                                    contactTextView.text = "Wybierz trenera, aby uzyskać kontakt!"
+                                    hoursAdapter = HoursAdapter(emptyList()) { }
+                                    hoursRecyclerView.adapter = hoursAdapter
+                                    reserveButton.isEnabled = false
+                                }
                             }
+
                         }
 
                         override fun onCancelled(error: DatabaseError) {
@@ -301,7 +352,6 @@ class TrainersFragment : Fragment() {
         val classTypesText = dialogView.findViewById<TextView>(R.id.textViewClassTypes)
         val groupLevelsText = dialogView.findViewById<TextView>(R.id.textViewGroupLevels)
 
-        // Wstępne dane
         nameInput.setText(trainer.name)
         surnameInput.setText(trainer.surname)
 
@@ -398,78 +448,88 @@ class TrainersFragment : Fragment() {
 
 
 
+    @SuppressLint("SetTextI18n")
     private fun setupTrainerRecycler(trainers: List<Trainer>) {
-        val addHoursButton: Button = requireView().findViewById(R.id.addHoursButton)
-        val editTrainerButton: Button = requireView().findViewById(R.id.editTrainerButton)
+        val addHoursButton = requireView().findViewById<Button>(R.id.addHoursButton)
+        val editTrainerButton = requireView().findViewById<Button>(R.id.editTrainerButton)
 
         trainersAdapter = TrainersAdapter(trainers) { trainer ->
             selectedTrainer = trainer
             contactTextView.text = "Kontakt:\n${trainer.contact}"
             updateAvailableHours()
 
-            addHoursButton.visibility = View.VISIBLE
-            editTrainerButton.visibility = View.VISIBLE
-
-            addHoursButton.setOnClickListener {
-                showAddHoursDialog(trainer)
+            addHoursButton.apply {
+                visibility = View.VISIBLE
+                setOnClickListener { showAddHoursDialog(trainer) }
             }
 
-            editTrainerButton.setOnClickListener {
-                showEditTrainerDialog(trainer)
+            editTrainerButton.apply {
+                visibility = View.VISIBLE
+                setOnClickListener { showEditTrainerDialog(trainer) }
             }
         }
 
-        trainersRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        trainersRecyclerView.adapter = trainersAdapter
+        trainersRecyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = trainersAdapter
+        }
     }
 
-
+    @SuppressLint("DefaultLocale")
     private fun showAddHoursDialog(trainer: Trainer) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_add_hours, null)
-        val daySpinner = dialogView.findViewById<Spinner>(R.id.spinnerDayDialog)
+        val dateButton = dialogView.findViewById<Button>(R.id.buttonPickDate)
         val hourInput = dialogView.findViewById<EditText>(R.id.editTextHour)
+        val addHourButton = dialogView.findViewById<Button>(R.id.buttonAddHour)
+        val hoursListView = dialogView.findViewById<ListView>(R.id.listViewHours)
 
-        daySpinner.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, daysOfWeek)
+        val selectedHours = mutableListOf<String>()
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, selectedHours)
+        hoursListView.adapter = adapter
+
+        var selectedDate: String? = null
+
+        dateButton.setOnClickListener {
+            val calendar = Calendar.getInstance()
+            DatePickerDialog(requireContext(), { _, year, month, dayOfMonth ->
+                selectedDate = String.format("%04d-%02d-%02d", year, month + 1, dayOfMonth)
+                dateButton.text = selectedDate
+            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+        }
+
+        addHourButton.setOnClickListener {
+            val hour = hourInput.text.toString().trim()
+            if (hour.matches(Regex("\\d{2}:\\d{2}"))) {
+                selectedHours.add(hour)
+                adapter.notifyDataSetChanged()
+                hourInput.text.clear()
+            } else {
+                Toast.makeText(requireContext(), "Wprowadź godzinę w formacie HH:MM", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         AlertDialog.Builder(requireContext())
-            .setTitle("Dodaj godzinę dla ${trainer.name} ${trainer.surname}")
+            .setTitle("Dodaj godziny dostępności")
             .setView(dialogView)
-            .setPositiveButton("Dodaj") { _, _ ->
-                val selectedDay = daySpinner.selectedItem.toString()
-                val enteredHour = hourInput.text.toString()
-
-                if (enteredHour.isNotBlank()) {
-                    val key = "${trainer.name} ${trainer.surname}"
-                    val scheduleRef = database.getReference("scheduleTrainers").child(key).child(selectedDay)
-
-                    scheduleRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            val currentList = snapshot.children.mapNotNull { it.getValue(String::class.java) }.toMutableList()
-                            if (!currentList.contains(enteredHour)) {
-                                currentList.add(enteredHour)
-                                val updatedMap = currentList.mapIndexed { index, value -> index.toString() to value }.toMap()
-                                scheduleRef.setValue(updatedMap)
-                                Toast.makeText(requireContext(), "Godzina dodana!", Toast.LENGTH_SHORT).show()
-                                updateAvailableHours()
-                                loadTrainers()
-                            } else {
-                                Toast.makeText(requireContext(), "Godzina już istnieje.", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {
-                            Toast.makeText(requireContext(), "Błąd podczas zapisu", Toast.LENGTH_SHORT).show()
-                        }
-                    })
+            .setPositiveButton("Zapisz") { _, _ ->
+                if (selectedDate != null && selectedHours.isNotEmpty()) {
+                    val trainerKey = "${trainer.name} ${trainer.surname}"
+                    val trainerDateRef = database.getReference("scheduleTrainers").child(trainerKey).child(selectedDate!!)
+                    selectedHours.forEachIndexed { index, hour ->
+                        trainerDateRef.child(index.toString()).setValue(hour)
+                    }
+                    Toast.makeText(requireContext(), "Godziny zapisane!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(requireContext(), "Wybierz datę i dodaj godziny!", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Anuluj", null)
             .show()
     }
 
-
+    @SuppressLint("SetTextI18n")
     private fun updateAvailableHours() {
-        val hours = selectedTrainer?.availability?.get(selectedDay) ?: emptyList()
+        val hours = selectedTrainer?.availability?.get(selectedDate) ?: emptyList()
 
         hoursAdapter = HoursAdapter(hours) { selected ->
             selectedHour = selected
@@ -487,7 +547,6 @@ class TrainersFragment : Fragment() {
             reserveButton.isEnabled = false
         }
     }
-
     data class Trainer(
         val name: String,
         val surname: String,
@@ -496,4 +555,5 @@ class TrainersFragment : Fragment() {
         val classTypes: List<String>,
         val groupLevels: List<String>
     )
+
 }

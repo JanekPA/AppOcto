@@ -5,9 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.content.res.AppCompatResources.getDrawable
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 
 class ScheduleAdapter(
+
     private var scheduleMap: Map<String, ScheduleItem>,
     private val onItemClicked: (String, ScheduleItem) -> Unit
 ) : RecyclerView.Adapter<ScheduleAdapter.ScheduleViewHolder>() {
@@ -23,11 +27,11 @@ class ScheduleAdapter(
     }
 
 
-    fun getItem(timeKey: String): ScheduleItem? = scheduleMap[timeKey]
-
     class ScheduleViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.item_title)
         val time: TextView = view.findViewById(R.id.item_time)
+        val favoriteButton: View = view.findViewById(R.id.favorite_button)
+        val favoriteButtonBackground: View = view.findViewById(R.id.favorite_button_background)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScheduleViewHolder {
@@ -46,7 +50,16 @@ class ScheduleAdapter(
             item.classType
 
         holder.time.text = item.time
-        holder.itemView.setOnClickListener { onItemClicked(id, item) }
+        holder.itemView.setOnClickListener { onItemClicked(id, item)
+            }
+        holder.favoriteButton.setOnClickListener {
+            holder.favoriteButtonBackground.setBackgroundResource(R.drawable.favorite_background_selected)
+            Toast.makeText(
+                holder.itemView.context,
+                "Zajęcie zostało dodane do ulubionych!",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     override fun getItemCount(): Int = scheduleList.size

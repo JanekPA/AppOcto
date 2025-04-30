@@ -62,14 +62,15 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Dzień tygodnia"
+            android:text="Data treningu"
             android:textStyle="bold"
             android:layout_marginBottom="4dp" />
 
-        <Spinner
-            android:id="@+id/spinnerDay"
+        <Button
+            android:id="@+id/buttonPickDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="Wybierz datę"
             android:layout_marginBottom="12dp" />
 
         <!-- Lista dostępnych godzin -->

@@ -41,7 +41,7 @@ class RegisterFragment : Fragment() {
             val email = binding.textEmail.text.toString()
             val pass = binding.textRegisterpassword.text.toString()
             val username = binding.textUsername.text.toString()
-
+            val role = "user"
             if (!isValidEmail(email)) {
                 Toast.makeText(requireContext(), "Nieprawidłowy format e-maila", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -60,7 +60,8 @@ class RegisterFragment : Fragment() {
                                 val userMap = mapOf(
                                     "name" to name,
                                     "username" to username,
-                                    "email" to email
+                                    "email" to email,
+                                    "role" to role
                                 )
 
                                 firebaseRef.setValue(userMap)

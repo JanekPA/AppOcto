@@ -3,7 +3,10 @@ package com.example.octopus
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -12,6 +15,7 @@ import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.isVisible
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 
@@ -28,7 +32,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         // NavController
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
@@ -54,6 +57,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_trainers -> navController.navigate(R.id.trainersFragment)
                 R.id.nav_settings -> navController.navigate(R.id.settingsFragment)
                 R.id.nav_help -> navController.navigate(R.id.helpFragment)
+                R.id.for_trainers -> navController.navigate(R.id.forTrainersFragment)
                 R.id.nav_logout -> {
                     FirebaseAuth.getInstance().signOut()
                     drawerLayout.closeDrawer(GravityCompat.END)
@@ -119,24 +123,37 @@ class MainActivity : AppCompatActivity() {
         val menu = navView.menu
         val loginItem = menu.findItem(R.id.nav_login)
         val logoutItem = menu.findItem(R.id.nav_logout)
+        val forTrainersItem = menu.findItem(R.id.for_trainers)
         val headerView = navView.getHeaderView(0)
         val headerText = headerView.findViewById<TextView>(R.id.nav_header_text)
 
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
             // Użytkownik zalogowany
+
             val uid = user.uid
             val userRef = FirebaseDatabase.getInstance().getReference("UsersPersonalization").child(uid)
-            userRef.child("username").get()
+            userRef.get()
                 .addOnSuccessListener { snapshot ->
-                    val username = snapshot.getValue(String::class.java) ?: "Użytkowniku"
-                    headerText.text = "Witaj, $username!"
+                    val username = snapshot.child("username").getValue(String::class.java) ?: "Użytkowniku"
+                    val role = snapshot.child("role").getValue(String::class.java)
+                    if (role != "user") {
+                        headerText.text = "Witaj, $username! \n Rola: $role"
+                        if (role == "trainer")
+                        {
+                            forTrainersItem.isVisible = true
+                        }
+                    }
+                    else{
+                        headerText.text = "Witaj, $username!"
+                    }
                 }
                 .addOnFailureListener {
                     headerText.text = "Witaj!"
                 }
             loginItem.isVisible = false
             logoutItem.isVisible = true
+
 
         } else {
             // Gość

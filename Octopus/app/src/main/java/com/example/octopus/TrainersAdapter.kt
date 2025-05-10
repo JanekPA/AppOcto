@@ -9,9 +9,10 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 
+
 class TrainersAdapter(
-    private val trainers: List<TrainersFragment.Trainer>,
-    private val onTrainerSelected: (TrainersFragment.Trainer) -> Unit
+    private val trainers: List<Trainer>,
+    private val onTrainerSelected: (Trainer) -> Unit
 ) : RecyclerView.Adapter<TrainersAdapter.TrainerViewHolder>() {
 
     private var selectedPosition = -1

@@ -7,11 +7,12 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
+import androidx.collection.emptyLongSet
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.database.FirebaseDatabase
 
 class ScheduleAdapter(
-
     private var scheduleMap: Map<String, ScheduleItem>,
     private val onItemClicked: (String, ScheduleItem) -> Unit
 ) : RecyclerView.Adapter<ScheduleAdapter.ScheduleViewHolder>() {
@@ -48,17 +49,29 @@ class ScheduleAdapter(
             "${item.classType} gr. ${item.groupLevel}"
         else
             item.classType
-
+        var isFavorite = false;
         holder.time.text = item.time
         holder.itemView.setOnClickListener { onItemClicked(id, item)
             }
         holder.favoriteButton.setOnClickListener {
-            holder.favoriteButtonBackground.setBackgroundResource(R.drawable.favorite_background_selected)
-            Toast.makeText(
-                holder.itemView.context,
-                "Zajęcie zostało dodane do ulubionych!",
-                Toast.LENGTH_SHORT
-            ).show()
+            if (!isFavorite) {
+                holder.favoriteButtonBackground.setBackgroundResource(R.drawable.favorite_background_selected)
+                isFavorite = true
+                Toast.makeText(
+                    holder.itemView.context,
+                    "Zajęcie zostało dodane do ulubionych!",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            else{
+                holder.favoriteButtonBackground.setBackgroundResource(R.drawable.favorite_background_default)
+                isFavorite = false
+                Toast.makeText(
+                    holder.itemView.context,
+                    "Zajęcie zostało usunięte z ulubionych!",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 

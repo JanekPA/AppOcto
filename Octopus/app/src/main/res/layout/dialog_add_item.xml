@@ -11,6 +11,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Nazwa przedmiotu" />
+    <EditText
+        android:id="@+id/itemPriceEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Cena (np. 49.99)"
+        android:inputType="numberDecimal" />
 
     <EditText
         android:id="@+id/itemColorEditText"

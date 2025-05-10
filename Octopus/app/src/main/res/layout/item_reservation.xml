@@ -2,24 +2,50 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="12dp">
+    android:padding="12dp"
+    android:layout_marginBottom="8dp">
 
     <TextView
         android:id="@+id/itemNameText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Przedmiot"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:textSize="16sp" />
+    <TextView
+        android:id="@+id/priceText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Cena: 0.00 zł"
+        android:textStyle="bold"
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/quantityText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Ilość" />
+        android:text="Ilość"
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/paymentText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Płatność" />
+        android:text="Płatność"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/pickupDateText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Data odbioru"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/statusText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Status"
+        android:textStyle="italic" />
+
 </LinearLayout>

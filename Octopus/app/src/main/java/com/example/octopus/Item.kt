@@ -6,5 +6,7 @@ data class Item(
     val color: String = "",
     val type: String = "",
     val size: String = "",
-    val quantity: Int = 1
+    val quantity: Int = 1,
+    val price: Double = 0.0,
+    val category: String = ""
 )

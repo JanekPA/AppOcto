@@ -84,16 +84,19 @@
         android:id="@+id/helpFragment"
         android:name="com.example.octopus.HelpFragment"
         android:label="Pomoc i Kontakt" />
-
+    <fragment
+        android:id="@+id/forTrainersFragment"
+        android:name="com.example.octopus.TrainerPanelFragment"
+        android:label="Dla trenerów"/>
     <fragment
         android:id="@+id/editDescriptionFragment"
         android:name="com.example.octopus.EditDescriptionFragment"
         android:label="Opis zajęć">
         <argument
-            android:name="day"
+            android:name="classType"
             app:argType="string" />
         <argument
-            android:name="time"
+            android:name="groupLevel"
             app:argType="string" />
     </fragment>
 </navigation>

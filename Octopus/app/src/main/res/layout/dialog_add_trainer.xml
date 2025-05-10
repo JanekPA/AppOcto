@@ -54,6 +54,7 @@
             android:padding="12dp"
             android:background="?attr/selectableItemBackground"
             android:text="Wybierz typy zajęć"
+            android:hint="Wybierz typy zajęć"
             android:textColor="@android:color/black"
             android:layout_marginTop="8dp" />
 
@@ -64,6 +65,7 @@
             android:padding="12dp"
             android:background="?attr/selectableItemBackground"
             android:text="Wybierz poziomy grup"
+            android:hint="Wybierz poziom zajęć"
             android:textColor="@android:color/black"
             android:layout_marginTop="8dp" />
 

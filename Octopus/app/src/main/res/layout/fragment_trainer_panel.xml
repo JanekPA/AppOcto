@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/scroll_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Sekcja zdjęcia + grafik godzin -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/trainer_profile_image"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_marginEnd="16dp"
+                android:background="@android:color/darker_gray"
+                android:contentDescription="Profil trenera" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="76dp"
+                    android:layout_marginBottom="4dp"
+                    android:text="Daty treningu"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/buttonPickDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Wybierz datę"
+                    android:layout_marginBottom="12dp" />
+
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/trainer_hours_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp" />
+
+                <Button
+                    android:id="@+id/button_add_hour"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dodaj godziny" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Dane trenera -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/text_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Imię i nazwisko" />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/text_contact"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Kontakt" />
+
+
+        </LinearLayout>
+
+        <!-- Opis -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/text_description"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Opis trenera" />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <Button
+                android:id="@+id/editDataButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:layout_weight="1"
+                android:text="Edytuj dane" />
+
+            <Button
+                android:id="@+id/editDescriptionButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:layout_weight="1"
+                android:baselineAligned="false"
+                android:text="Edytuj opis" />
+
+        </LinearLayout>
+
+        <!-- Stoper -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Stoper"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp" />
+
+        <EditText
+            android:id="@+id/input_round_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Czas rundy (sekundy)"
+            android:inputType="number" />
+
+        <EditText
+            android:id="@+id/input_break_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Czas przerwy (sekundy)"
+            android:inputType="number" />
+
+        <EditText
+            android:id="@+id/input_rounds_count"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Liczba rund"
+            android:inputType="number" />
+
+        <Button
+            android:id="@+id/button_start_timer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Uruchom stoper" />
+    </LinearLayout>
+</ScrollView>

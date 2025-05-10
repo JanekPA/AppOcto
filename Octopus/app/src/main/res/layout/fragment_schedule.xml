@@ -3,14 +3,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@drawable/octopus_background3">
 
     <!-- Spinner do wyboru dnia tygodnia -->
     <Spinner
         android:id="@+id/day_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="#888888"
+        android:popupBackground="#B0B0B0"
+        android:textColor="#FFFFFF"
+        android:dropDownSelector="@android:color/darker_gray"
+    />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,7 +27,7 @@
         <!-- Lewa kolumna - Mała Sala -->
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
             android:paddingEnd="8dp">
@@ -32,7 +38,7 @@
                 android:text="Mała Sala"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:gravity="center"
+                android:textColor="#FFFFFF"
                 android:layout_gravity="center_horizontal"
                 android:paddingBottom="8dp"/>
 
@@ -40,13 +46,14 @@
                 android:id="@+id/small_room_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@android:color/darker_gray"/>
+                android:background="#252625"
+                android:padding="4dp"/>
         </LinearLayout>
 
         <!-- Prawa kolumna - Duża Sala -->
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
             android:paddingStart="8dp">
@@ -57,7 +64,7 @@
                 android:text="Duża Sala"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:gravity="center"
+                android:textColor="#FFFFFF"
                 android:layout_gravity="center_horizontal"
                 android:paddingBottom="8dp"/>
 
@@ -65,7 +72,8 @@
                 android:id="@+id/large_room_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@android:color/darker_gray"/>
+                android:background="#252625"
+                android:padding="4dp"/>
         </LinearLayout>
     </LinearLayout>
 
@@ -75,6 +83,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:backgroundTint="#F95007"
+        android:tint="#FFFFFF"
+        android:visibility="gone"
         android:src="@android:drawable/ic_input_add"
         android:contentDescription="Dodaj zajęcia"/>
 </LinearLayout>

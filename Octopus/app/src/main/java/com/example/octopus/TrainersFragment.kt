@@ -18,6 +18,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
 
+
 class TrainersFragment : Fragment() {
 
     private lateinit var trainingTypeSpinner: Spinner
@@ -283,7 +284,7 @@ class TrainersFragment : Fragment() {
                     val instagram = child.child("instagram").getValue(String::class.java) ?: ""
                     val types = child.child("classTypes").children.mapNotNull { it.getValue(String::class.java)?.trim() }
                     val levels = child.child("groupLevels").children.mapNotNull { it.getValue(String::class.java)?.trim() }
-                    val contact = "📞 $phone\n✉️ $email\n📘 $facebook\n📸 $instagram"
+
 
                     val availabilityRef = database.getReference("scheduleTrainers").child(child.key!!)
                     availabilityRef.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -306,7 +307,7 @@ class TrainersFragment : Fragment() {
                             }
 
 
-                            filteredList.add(Trainer(name, surname, contact, availability, types, levels))
+                            filteredList.add(Trainer(name, surname, email, facebook, phone, instagram, availability, types, levels))
                             loadedCount++
                             if (loadedCount == filteredChildren.size) {
                                 setupTrainerRecycler(filteredList)
@@ -355,11 +356,14 @@ class TrainersFragment : Fragment() {
         nameInput.setText(trainer.name)
         surnameInput.setText(trainer.surname)
 
-        val lines = trainer.contact.split("\n")
-        phoneInput.setText(lines.getOrNull(0)?.removePrefix("📞 ") ?: "")
-        emailInput.setText(lines.getOrNull(1)?.removePrefix("✉️ ") ?: "")
-        facebookInput.setText(lines.getOrNull(2)?.removePrefix("📘 ") ?: "")
-        instagramInput.setText(lines.getOrNull(3)?.removePrefix("📸 ") ?: "")
+        val linePhoneNumber = trainer.phoneNumber!!.split("\n")
+        val lineEmailInput = trainer.email!!.split("\n")
+        val lineFacebookInput = trainer.facebook!!.split("\n")
+        val lineInstagramInput = trainer.instagram!!.split("\n")
+        phoneInput.setText(linePhoneNumber.getOrNull(0)?.removePrefix("📞 ") ?: "")
+        emailInput.setText(lineEmailInput.getOrNull(1)?.removePrefix("✉️ ") ?: "")
+        facebookInput.setText(lineFacebookInput.getOrNull(2)?.removePrefix("📘 ") ?: "")
+        instagramInput.setText(lineInstagramInput.getOrNull(3)?.removePrefix("📸 ") ?: "")
 
         val selectedTypes = trainer.classTypes.toMutableList()
         val selectedLevels = trainer.groupLevels.toMutableList()
@@ -452,10 +456,9 @@ class TrainersFragment : Fragment() {
     private fun setupTrainerRecycler(trainers: List<Trainer>) {
         val addHoursButton = requireView().findViewById<Button>(R.id.addHoursButton)
         val editTrainerButton = requireView().findViewById<Button>(R.id.editTrainerButton)
-
-        trainersAdapter = TrainersAdapter(trainers) { trainer ->
+        trainersAdapter = TrainersAdapter(trainers) { trainer: Trainer ->
             selectedTrainer = trainer
-            contactTextView.text = "Kontakt:\n${trainer.contact}"
+            contactTextView.text = "Kontakt:\n${trainer.phoneNumber}\n${trainer.email}\n${trainer.facebook}\n${trainer.instagram}"
             updateAvailableHours()
 
             addHoursButton.apply {
@@ -547,13 +550,6 @@ class TrainersFragment : Fragment() {
             reserveButton.isEnabled = false
         }
     }
-    data class Trainer(
-        val name: String,
-        val surname: String,
-        val contact: String,
-        val availability: Map<String, List<String>>,
-        val classTypes: List<String>,
-        val groupLevels: List<String>
-    )
+
 
 }

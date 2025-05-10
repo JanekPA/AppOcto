@@ -17,17 +17,35 @@ class ItemsAdapter(
         private val typeText: TextView = itemView.findViewById(R.id.textViewType)
         private val sizeText: TextView = itemView.findViewById(R.id.textViewSize)
         private val quantityText: TextView = itemView.findViewById(R.id.textViewQuantity)
+        private val priceText: TextView = itemView.findViewById(R.id.priceText)
 
         fun bind(item: Item) {
             nameText.text = "${item.name}"
-            colorText.text = if (item.color.isNotBlank()) "Kolor: ${item.color}" else "Kolor: -"
-            typeText.text = if (item.type.isNotBlank()) "Typ: ${item.type}" else "Typ: -"
-            sizeText.text = if (item.size.isNotBlank()) "Rozmiar: ${item.size}" else "Rozmiar: -"
+            priceText.text = "Cena: %.2f zł".format(item.price)
             quantityText.text = "Ilość: ${item.quantity}"
+            when (item.category) {
+                "Sprzęt" -> {
+                    colorText.text = if (item.color.isNotBlank()) "Kolor: ${item.color}" else "Kolor: -"
+                    sizeText.text = if (item.size.isNotBlank()) "Rozmiar: ${item.size}" else "Rozmiar: -"
+                    typeText.visibility = View.GONE
+                }
 
-            itemView.setOnClickListener { onItemClick(item) }
+                "Ubranie" -> {
+                    colorText.text = if (item.color.isNotBlank()) "Kolor: ${item.color}" else "Kolor: -"
+                    typeText.text = if (item.type.isNotBlank()) "Typ: ${item.type}" else "Typ: -"
+                    sizeText.text = if (item.size.isNotBlank()) "Rozmiar: ${item.size}" else "Rozmiar: -"
+                }
+
+                "Akcesoria" -> {
+                    colorText.text = if (item.color.isNotBlank()) "Kolor: ${item.color}" else "Kolor: -"
+                    sizeText.text = if(item.size.isNotBlank()) "Rozmiar: ${item.size}" else "Rozmiar: Uniwersalny"
+                    typeText.visibility = View.GONE
+                }
+            }
+                itemView.setOnClickListener { onItemClick(item) }
+            }
         }
-    }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_product, parent, false)
@@ -36,6 +54,7 @@ class ItemsAdapter(
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         holder.bind(items[position])
+
     }
 
     override fun getItemCount(): Int = items.size

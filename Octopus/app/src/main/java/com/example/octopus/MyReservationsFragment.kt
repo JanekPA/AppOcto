@@ -1,9 +1,11 @@
 package com.example.octopus
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -30,7 +32,9 @@ class MyReservationsFragment : Fragment() {
         recyclerView = view.findViewById(R.id.myReservationsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        adapter = ReservationAdapter(reservations)
+        adapter = ReservationAdapter(reservations) { reservation ->
+            showReservationDetailsDialog(reservation)
+        }
         recyclerView.adapter = adapter
 
         loadUserReservations()
@@ -43,20 +47,38 @@ class MyReservationsFragment : Fragment() {
         val currentEmail = currentUser?.email ?: return
 
         database = FirebaseDatabase.getInstance().reference.child("ReservedItems")
-        database.addListenerForSingleValueEvent(object : ValueEventListener {
+        database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 reservations.clear()
                 for (firstLevel in snapshot.children) {
-                        val data = firstLevel.value as? Map<String, Any>
-                        if (data != null && data["userEmail"] == currentEmail) {
-                            reservations.add(data)
-                        }
+                    val data = firstLevel.value as? Map<String, Any>
+                    if (data != null && data["userEmail"] == currentEmail) {
+                        reservations.add(data)
+                    }
                 }
                 adapter.notifyDataSetChanged()
             }
 
-            override fun onCancelled(error: DatabaseError) {}
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(context, "Błąd ładowania rezerwacji", Toast.LENGTH_SHORT).show()
+            }
         })
     }
 
+    private fun showReservationDetailsDialog(reservation: Map<String, Any>) {
+        val message = """
+        Przedmiot: ${reservation["itemName"]}
+        Ilość: ${reservation["quantity"]}
+        Płatność: ${reservation["payment"]}
+        Rezerwujący: ${reservation["firstName"]} ${reservation["lastName"]}
+        Telefon: ${reservation["phone"]}
+        Data odbioru: ${reservation["pickupDate"]}
+    """.trimIndent()
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Szczegóły rezerwacji")
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .show()
+    }
 }

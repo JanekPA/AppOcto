@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
 class ScheduleFragment : Fragment() {
@@ -28,9 +29,12 @@ class ScheduleFragment : Fragment() {
     private var classTypes: List<String> = emptyList()
     private var groupLevels: List<String> = emptyList()
 
-    private fun openEditDescriptionFragment(item: ScheduleItem, itemId: String) {
+    private fun openEditDescriptionFragment(item: ScheduleItem) {
+        val classType = item.classType
+        val groupLevel = item.groupLevel ?: ""
+
         val action = ScheduleFragmentDirections
-            .actionScheduleFragmentToEditDescriptionFragment(selectedDay, itemId)
+            .actionScheduleFragmentToEditDescriptionFragment(classType, groupLevel)
         findNavController().navigate(action)
     }
 
@@ -194,15 +198,36 @@ class ScheduleFragment : Fragment() {
 
     private fun showEditDialog(item: ScheduleItem, itemId: String) {
         val options = arrayOf("Edytuj zajęcia", "Edytuj opis zajęć")
-        AlertDialog.Builder(requireContext())
-            .setTitle("Wybierz akcję")
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> showEditClassDialog(item, itemId)
-                    1 -> openEditDescriptionFragment(item, itemId)
+        val user = FirebaseAuth.getInstance().currentUser
+        val uid = user?.uid
+        val userRef =
+            uid?.let { FirebaseDatabase.getInstance().getReference("UsersPersonalization").child(it) }
+        if (userRef != null) {
+            userRef.get()
+                .addOnSuccessListener { snapshot ->
+                    val role = snapshot.child("role").getValue(String::class.java)
+                    if(role == "admin") {
+                        AlertDialog.Builder(requireContext())
+                            .setTitle("Wybierz akcję")
+                            .setItems(options) { _, which ->
+                                when (which) {
+                                    0 -> showEditClassDialog(item, itemId)
+                                    1 -> openEditDescriptionFragment(item)
+                                }
+                            }
+                            .show()
+                    }
+                    else
+                    {
+                        openEditDescriptionFragment(item)
+                    }
                 }
-            }
-            .show()
+                .addOnFailureListener {
+                    Toast.makeText(requireContext(), "Błąd scheduleFragment!", Toast.LENGTH_SHORT).show()
+                }
+        }
+
+
     }
 
     private fun updateScheduleList() {

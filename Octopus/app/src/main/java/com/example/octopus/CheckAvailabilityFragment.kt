@@ -1,6 +1,7 @@
 package com.example.octopus
 
 import android.app.AlertDialog
+import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.*
 import android.widget.*
@@ -66,7 +67,13 @@ class CheckAvailabilityFragment : Fragment() {
                 items.clear()
                 for (itemSnap in snapshot.children) {
                     val item = itemSnap.getValue(Item::class.java)
-                    item?.let { items.add(it) }
+                    if(item?.quantity == 0)
+                    {
+                        typeRef.child(item.id).removeValue()
+                    }
+                    else {
+                        item?.let { items.add(it) }
+                    }
                 }
                 adapter.notifyDataSetChanged()
             }
@@ -83,6 +90,8 @@ class CheckAvailabilityFragment : Fragment() {
         val sizeSpinner = dialogView.findViewById<Spinner>(R.id.itemSizeSpinner)
         val customSizeEditText = dialogView.findViewById<EditText>(R.id.itemCustomSizeEditText)
         val quantityEditText = dialogView.findViewById<EditText>(R.id.itemQuantityEditText)
+        val priceEditText = dialogView.findViewById<EditText>(R.id.itemPriceEditText)
+
 
         // Ukryj/odkryj elementy na podstawie typu
         if (currentType == "Ubranie") {
@@ -127,16 +136,17 @@ class CheckAvailabilityFragment : Fragment() {
             .setPositiveButton("Dodaj") { dialog, _ ->
                 val name = nameEditText.text.toString()
                 val color = colorEditText.text.toString()
-                val type = if (currentType == "Ubranie") typeSpinner.selectedItem.toString() else ""
+                val type = if (currentType == "Ubranie") typeSpinner.selectedItem.toString() else "Uniwersalny"
                 val size = when (currentType) {
                     "Ubranie" -> sizeSpinner.selectedItem.toString()
                     "Sprzęt" -> customSizeEditText.text.toString().ifEmpty { "Uniwersalny" }
+                    "Akcesoria" -> sizeSpinner.selectedItem.toString()
                     else -> ""
                 }
                 val quantity = quantityEditText.text.toString().toIntOrNull() ?: 1
-
+                val price = priceEditText.text.toString().toDoubleOrNull() ?: 0.0
                 val itemId = database.child("Storage").child(currentType).push().key ?: UUID.randomUUID().toString()
-                val newItem = Item(itemId, name, color, type, size, quantity)
+                val newItem = Item(itemId, name, color, type, size, quantity, price, currentType)
 
                 database.child("Storage").child(currentType).child(itemId).setValue(newItem)
                 loadItems()
@@ -166,7 +176,21 @@ class CheckAvailabilityFragment : Fragment() {
         val paymentAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, paymentOptions)
         paymentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         paymentSpinner.adapter = paymentAdapter
-
+        val pickupDateEditText = dialogView.findViewById<EditText>(R.id.pickupDateEditText)
+        pickupDateEditText.setOnClickListener {
+            val calendar = Calendar.getInstance()
+            val datePicker = DatePickerDialog(
+                requireContext(),
+                { _, year, month, day ->
+                    val selectedDate = String.format("%02d-%02d-%d", day, month + 1, year)
+                    pickupDateEditText.setText(selectedDate)
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            )
+            datePicker.show()
+        }
         AlertDialog.Builder(requireContext())
             .setTitle("Zarezerwuj: ${item.name}")
             .setView(dialogView)
@@ -190,19 +214,27 @@ class CheckAvailabilityFragment : Fragment() {
                     "lastName" to lastName,
                     "phone" to phone,
                     "payment" to payment,
-                    "quantity" to quantity
+                    "quantity" to quantity,
+                    "pickupDate" to pickupDateEditText.text.toString(),
+                    "price" to item.price,
+                    "status" to "W trakcie realizacji"
                 )
+
 
                 val reservationId = database.child("ReservedItems").push().key ?: UUID.randomUUID().toString()
                 database.child("ReservedItems").child(reservationId).setValue(reservation)
 
                 // Aktualizacja ilości w magazynie
                 val newQuantity = item.quantity - quantity
+                if (newQuantity == 0) {
+                    database.child("Storage").child(currentType).child(item.id).removeValue()
+                }
                 database.child("Storage").child(currentType).child(item.id).child("quantity").setValue(newQuantity)
-
-                Toast.makeText(requireContext(), "Zarezerwowano!", Toast.LENGTH_SHORT).show()
-                loadItems()
-                dialog.dismiss()
+                    .addOnCompleteListener {
+                        Toast.makeText(requireContext(), "Zarezerwowano!", Toast.LENGTH_SHORT).show()
+                        loadItems()
+                        dialog.dismiss()
+                    }
             }
             .setNegativeButton("Anuluj", null)
             .show()

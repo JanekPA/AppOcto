@@ -2,6 +2,17 @@
     <string name="app_name">Octopus</string>
     <string name="navigation_drawer_open">Otwórz menu</string>
     <string name="navigation_drawer_close">Zamknij menu</string>
+    <string name="settings">Ustawienia</string>
+    <string name="push_notify">Powiadomienia push</string>
+    <string name="theme">Motyw</string>
+    <string name="language">Język</string>
+    <string name="schedule">Grafik</string>
+    <string name="homepage">Strona główna</string>
+    <string-array name="themes_array">
+        <item>Domyślny</item>
+        <item>Jasny</item>
+        <item>Ciemny</item>
+    </string-array>
     <string-array name="rooms_array">
         <item>Mała Sala</item>
         <item>Duża Sala</item>
@@ -58,7 +69,9 @@
     <string-array name="payment_methods">
         <item>Gotówka</item>
     </string-array>
-
+    <string name="polish">Polski</string>
+    <string name="english">English</string>
+    <string name="ukrainian">Українська</string>
         <item name="nav_logout" type="id"/>
     <string name="payment_prompt">Opcja płatności</string>
 </resources>

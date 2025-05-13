@@ -8,7 +8,6 @@
         android:id="@+id/mainFragment"
         android:name="com.example.octopus.MainFragment"
         android:label="Octopus">
-
         <action
             android:id="@+id/action_mainFragment_to_scheduleFragment"
             app:destination="@id/scheduleFragment" />
@@ -61,9 +60,8 @@
 
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="com.example.octopus.com.example.octopus.SettingsFragment"
-        android:label="Ustawienia"
-        tools:layout="@layout/fragment_settings" />
+        android:name="com.example.octopus.SettingsFragment"
+        android:label="Ustawienia" />
 
     <fragment
         android:id="@+id/pricingFragment"
@@ -74,12 +72,18 @@
         android:id="@+id/trainersFragment"
         android:name="com.example.octopus.TrainersFragment"
         android:label="Trenerzy" />
-
+    <fragment
+        android:id="@+id/userProfileFragment"
+        android:name="com.example.octopus.UserProfileFragment"
+        android:label="Mój profil"/>
     <fragment
         android:id="@+id/reservationFragment"
         android:name="com.example.octopus.ReservationFragment"
         android:label="Rezerwacje" />
-
+    <fragment
+        android:id="@+id/TimerFragment"
+        android:name="com.example.octopus.TimerFragment"
+        android:label="Stoper" />
     <fragment
         android:id="@+id/helpFragment"
         android:name="com.example.octopus.HelpFragment"
@@ -87,7 +91,11 @@
     <fragment
         android:id="@+id/forTrainersFragment"
         android:name="com.example.octopus.TrainerPanelFragment"
-        android:label="Dla trenerów"/>
+        android:label="Dla trenerów">
+    <action
+        android:id="@+id/action_forTrainersFragment_to_TimerFragment"
+        app:destination="@id/TimerFragment" />
+    </fragment>
     <fragment
         android:id="@+id/editDescriptionFragment"
         android:name="com.example.octopus.EditDescriptionFragment"

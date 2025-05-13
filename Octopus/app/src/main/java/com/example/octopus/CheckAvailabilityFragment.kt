@@ -235,6 +235,41 @@ class CheckAvailabilityFragment : Fragment() {
                         loadItems()
                         dialog.dismiss()
                     }
+                val userRoleRef = database.child("UsersPersonalization")
+                database.child("UsersPersonalization").orderByKey().equalTo(user.uid).addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        for (userSnap in snapshot.children) {
+                            val role = userSnap.child("role").getValue(String::class.java)
+                            if (role == "user" || role == "trainer") {
+                                // Powiadom wszystkich adminów
+                                database.child("UsersPersonalization").addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(adminSnapshot: DataSnapshot) {
+                                        for (adminSnap in adminSnapshot.children) {
+                                            val adminRole = adminSnap.child("role").getValue(String::class.java)
+                                            if (adminRole == "admin") {
+                                                val adminUid = adminSnap.key ?: continue
+                                                val notifId = database.child("Notifications").child(adminUid).push().key ?: UUID.randomUUID().toString()
+
+                                                val notification = mapOf(
+                                                    "title" to "Nowa rezerwacja",
+                                                    "message" to "Użytkownik ${user.email} ($firstName $lastName) złożył zamówienie.",
+                                                    "reservationId" to reservationId,
+                                                    "timestamp" to System.currentTimeMillis()
+                                                )
+
+                                                database.child("Notifications").child(adminUid).child(notifId).setValue(notification)
+                                            }
+                                        }
+                                    }
+                                    override fun onCancelled(error: DatabaseError) {}
+                                })
+                            }
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {}
+                })
+
             }
             .setNegativeButton("Anuluj", null)
             .show()

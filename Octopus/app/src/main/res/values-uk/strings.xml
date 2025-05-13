@@ -1,0 +1,81 @@
+<resources>
+    <string name="app_name">Octopus</string>
+    <string name="navigation_drawer_open">Відкрити меню</string>
+    <string name="navigation_drawer_close">Закрити меню</string>
+    <string name="settings">Налаштування</string>
+    <string name="push_notify">Push-повідомлення</string>
+    <string name="theme">тема</string>
+    <string name="language">язик</string>
+    <string name="schedule">розклад</string>
+    <string name="homepage">Домашня сторінка</string>
+    <string-array name="rooms_array">
+        <item>Мала зала</item>
+        <item>Велика зала</item>
+    </string-array>
+    <string-array name="themes_array">
+        <item>За замовчуванням</item>
+        <item>світла</item>
+        <item>темна </item>
+    </string-array>
+    <string-array name="days_of_week">
+        <item>Понеділок</item>
+        <item>Вівторок</item>
+        <item>Середа</item>
+        <item>Четвер</item>
+        <item>Пʼятниця</item>
+        <item>Субота</item>
+        <item>Неділя</item>
+    </string-array>
+
+    <string-array name="class_types_array">
+        <item>MMA</item>
+        <item>Бокс</item>
+        <item>Кікбоксинг</item>
+        <item>Боротьба</item>
+        <item>No-Gi</item>
+        <item>BJJ</item>
+        <item>Вільний мат</item>
+    </string-array>
+
+    <string-array name="group_levels_array">
+        <item>початковий</item>
+        <item>діти (6 - 12 років)</item>
+        <item>юніори (12 - 16 років)</item>
+        <item>сімейна</item>
+        <item>середній рівень</item>
+        <item>просунутий</item>
+        <item>професіонали</item>
+        <item>змішана</item>
+        <item>спаринги</item>
+    </string-array>
+
+    <string-array name="item_types">
+        <item>Обладнання</item>
+        <item>Одяг</item>
+        <item>Аксесуари</item>
+    </string-array>
+
+    <string-array name="item_type_options">
+        <item>Дитячий</item>
+        <item>Дорослий - Жіночий</item>
+        <item>Дорослий - Чоловічий</item>
+    </string-array>
+
+    <string-array name="item_size_options">
+        <item>XS</item>
+        <item>S</item>
+        <item>M</item>
+        <item>L</item>
+        <item>XL</item>
+        <item>XXL</item>
+    </string-array>
+
+    <string-array name="payment_methods">
+        <item>Готівка</item>
+    </string-array>
+<string name="polish">Polski</string>
+<string name="english">English</string>
+<string name="ukrainian">Українська</string>
+    <item name="nav_logout" type="id" />
+    <string name="payment_prompt">Спосіб оплати</string>
+</resources>

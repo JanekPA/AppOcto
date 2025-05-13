@@ -3,13 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@drawable/octopus_background3">
 
     <TextView
         android:id="@+id/tv_settings_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ustawienia"
+        android:text="@string/settings"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
@@ -20,7 +21,7 @@
         android:id="@+id/tv_notifications"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Powiadomienia push"
+        android:text="@string/push_notify"
         android:textSize="18sp"
         app:layout_constraintTop_toBottomOf="@id/tv_settings_title"
         app:layout_constraintStart_toStartOf="parent"
@@ -39,7 +40,7 @@
         android:id="@+id/tv_theme"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Motyw"
+        android:text="@string/theme"
         android:textSize="18sp"
         app:layout_constraintTop_toBottomOf="@id/tv_notifications"
         app:layout_constraintStart_toStartOf="parent"
@@ -57,7 +58,7 @@
         android:id="@+id/tv_language"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Język"
+        android:text="@string/language"
         android:textSize="18sp"
         app:layout_constraintTop_toBottomOf="@id/tv_theme"
         app:layout_constraintStart_toStartOf="parent"

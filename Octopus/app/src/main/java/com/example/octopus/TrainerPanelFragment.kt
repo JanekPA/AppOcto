@@ -3,16 +3,24 @@ package com.example.octopus
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.DatePickerDialog
+import android.net.Uri
 import android.os.Bundle
+import android.os.CountDownTimer
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -29,6 +37,7 @@ class TrainerPanelFragment : Fragment() {
     private lateinit var descriptionText: TextView
     private lateinit var editDataButton: Button
     private lateinit var editDescriptionButton: Button
+    private lateinit var buttonGoToTimer: Button
     private lateinit var classTypesRef: DatabaseReference
     private lateinit var groupLevelsRef: DatabaseReference
     private lateinit var pickDateButton: Button
@@ -39,6 +48,7 @@ class TrainerPanelFragment : Fragment() {
     private lateinit var hoursAdapter: HoursAdapter
     private lateinit var trainer: Trainer
     private lateinit var database: FirebaseDatabase
+    private lateinit var pickImageLauncher: ActivityResultLauncher<String>
     private val auth = FirebaseAuth.getInstance()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -62,9 +72,16 @@ class TrainerPanelFragment : Fragment() {
         editDescriptionButton = view.findViewById(R.id.editDescriptionButton)
         pickDateButton = view.findViewById(R.id.buttonPickDate)
         scheduleRef = database.getReference("scheduleTrainers")
+        buttonGoToTimer = view.findViewById(R.id.button_open_timer)
         personalHoursList.layoutManager = LinearLayoutManager(context)
+        pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                uploadProfileImage(it)
+            }
+        }
         val userEmail = auth.currentUser?.email ?: return
         trainersRef = database.getReference("TrainersData")
+        loadProfileImage()
         trainersRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (trainerSnapshot in snapshot.children) {
@@ -85,7 +102,17 @@ class TrainerPanelFragment : Fragment() {
                 Toast.makeText(context, "Błąd bazy danych", Toast.LENGTH_SHORT).show()
             }
         })
-
+        profileImage.setOnLongClickListener {
+            AlertDialog.Builder(requireContext())
+                .setTitle("Usuń zdjęcie profilowe")
+                .setMessage("Czy na pewno chcesz usunąć zdjęcie?")
+                .setPositiveButton("Tak") { _, _ ->
+                    deleteProfileImage()
+                }
+                .setNegativeButton("Anuluj", null)
+                .show()
+            true
+        }
         pickDateButton.setOnClickListener {
             showDatePickerDialog()
         }
@@ -112,14 +139,8 @@ class TrainerPanelFragment : Fragment() {
                         showEditTrainerDialog(existingTrainer)
                         dataTrainer = existingTrainer
                     } else {
-                        val baseName = "Nowy Trener"
-                        var newKey = baseName
-                        var counter = 2
-                        while (snapshot.hasChild(newKey)) {
-                            newKey = "$baseName$counter"
-                            counter++
-                        }
-
+                        var newKey = dataTrainer?.email
+                        var currentEmail = newKey?.replace(".",",")
                         val newTrainer = Trainer(
                             name = "Nowy",
                             surname = "Trener",
@@ -133,8 +154,10 @@ class TrainerPanelFragment : Fragment() {
                             description = ""
                         )
                         dataTrainer = newTrainer
-                        trainersRef.child(newKey).setValue(newTrainer).addOnSuccessListener {
-                            showEditTrainerDialog(newTrainer)
+                        if (currentEmail != null) {
+                            trainersRef.child(currentEmail).setValue(newTrainer).addOnSuccessListener {
+                                showEditTrainerDialog(newTrainer)
+                            }
                         }
                     }
                 }
@@ -145,14 +168,18 @@ class TrainerPanelFragment : Fragment() {
             })
         }
 
-
-
+        buttonGoToTimer.setOnClickListener{
+            findNavController().navigate(R.id.action_forTrainersFragment_to_TimerFragment)
+        }
+        profileImage.setOnClickListener {
+            pickImageLauncher.launch("image/*")
+        }
         editDescriptionButton.setOnClickListener {
             if (::trainer.isInitialized) {
                 showEditDialog("Opis", descriptionText.text.toString()) { newDesc ->
                     trainer.description = newDesc
                     descriptionText.text = newDesc
-                    trainersRef.child(trainer.name + " " + trainer.surname).child("description").setValue(newDesc)
+                    trainersRef.child("${trainer.email}").child("description").setValue(newDesc)
                 }
             } else {
                 Toast.makeText(context, "Dane trenera nie zostały jeszcze załadowane", Toast.LENGTH_SHORT).show()
@@ -163,6 +190,59 @@ class TrainerPanelFragment : Fragment() {
                 dataTrainer?.let { it1 -> showAddHoursDialog(it1) }
         }
     }
+    private fun uploadProfileImage(imageUri: Uri) {
+        val userEmail = FirebaseAuth.getInstance().currentUser?.email ?: return
+        val storageRef = FirebaseStorage.getInstance().reference
+        val imageRef = storageRef.child("profile_images/$userEmail.jpg")
+
+        imageRef.putFile(imageUri)
+            .addOnSuccessListener {
+                imageRef.downloadUrl.addOnSuccessListener { uri ->
+                    Glide.with(requireContext())
+                        .load(uri)
+                        .circleCrop()
+                        .into(profileImage)
+                    Toast.makeText(requireContext(), "Zdjęcie zapisane", Toast.LENGTH_SHORT).show()
+                }
+                // Odśwież na wszelki wypadek
+                loadProfileImage()
+            }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "Błąd przy zapisie zdjęcia", Toast.LENGTH_SHORT).show()
+            }
+    }
+    private fun loadProfileImage() {
+        val userEmail = FirebaseAuth.getInstance().currentUser?.email ?: return
+        val storageRef = FirebaseStorage.getInstance().reference
+        val imageRef = storageRef.child("profile_images/$userEmail.jpg")
+
+        imageRef.downloadUrl
+            .addOnSuccessListener { uri ->
+                Glide.with(requireContext())
+                    .load(uri)
+                    .circleCrop()
+                    .into(profileImage)
+            }
+            .addOnFailureListener {
+                // Nie ma zdjęcia – np. nie pokazuj nic lub ustaw domyślne
+                profileImage.setImageResource(R.drawable.ic_person)
+            }
+    }
+
+    private fun deleteProfileImage() {
+        val userEmail = FirebaseAuth.getInstance().currentUser?.email ?: return
+        val imageRef = FirebaseStorage.getInstance().reference.child("profile_images/$userEmail.jpg")
+
+        imageRef.delete()
+            .addOnSuccessListener {
+                profileImage.setImageResource(R.drawable.ic_person)
+                Toast.makeText(requireContext(), "Zdjęcie usunięte", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "Błąd przy usuwaniu zdjęcia", Toast.LENGTH_SHORT).show()
+            }
+    }
+
     private fun updateTrainerUI() {
         nameText.text = "${trainer.name} ${trainer.surname}"
         contactText.text = "📞 ${trainer.phoneNumber}\n✉️ ${trainer.email}\n📘 ${trainer.facebook}\n📸 ${trainer.instagram}"
@@ -191,7 +271,7 @@ class TrainerPanelFragment : Fragment() {
         datePickerDialog.show()
     }
     private fun loadAvailableHoursForDate(trainer: Trainer, date: String) {
-        val trainerKey = "${trainer.name} ${trainer.surname}"
+        val trainerKey = "${trainer.email}".replace(".",",")
 
         scheduleRef.child(trainerKey).child(date).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -244,7 +324,7 @@ class TrainerPanelFragment : Fragment() {
             .setView(dialogView)
             .setPositiveButton("Zapisz") { _, _ ->
                 if (selectedDate != null && selectedHours.isNotEmpty()) {
-                    val trainerKey = "${trainer.name} ${trainer.surname}"
+                    val trainerKey = "${trainer.email}".replace(".",",")
                     val trainerDateRef = database.getReference("scheduleTrainers").child(trainerKey).child(selectedDate!!)
                     selectedHours.forEachIndexed { index, hour ->
                         trainerDateRef.child(index.toString()).setValue(hour)
@@ -341,10 +421,10 @@ class TrainerPanelFragment : Fragment() {
             .setTitle("Edytuj dane trenera")
             .setView(dialogView)
             .setPositiveButton("Zapisz") { _, _ ->
-                val key = "${trainer.name} ${trainer.surname}"
+                val key = "${trainer.email}".replace(".",",")
                 val newName = nameInput.text.toString()
                 val newSurname = surnameInput.text.toString()
-                val newKey = "$newName $newSurname"
+                val newKey = emailInput.text.toString()
 
                 val updatedData = mapOf(
                     "name" to newName,
@@ -372,10 +452,5 @@ class TrainerPanelFragment : Fragment() {
 
     }
 
-    private fun getTodayDate(): String {
-        val calendar = Calendar.getInstance()
-        val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        return format.format(calendar.time)
-    }
 }
 

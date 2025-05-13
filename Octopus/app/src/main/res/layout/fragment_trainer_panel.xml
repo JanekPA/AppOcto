@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/scroll_view"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/octopus_background3">
 
     <LinearLayout
         android:id="@+id/container"
@@ -23,8 +24,9 @@
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:layout_marginEnd="16dp"
-                android:background="@android:color/darker_gray"
-                android:contentDescription="Profil trenera" />
+                android:src="@drawable/ic_person"
+                android:background="@drawable/circle_background"
+                 />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -142,39 +144,11 @@
 
         </LinearLayout>
 
-        <!-- Stoper -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Stoper"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp" />
-
-        <EditText
-            android:id="@+id/input_round_time"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Czas rundy (sekundy)"
-            android:inputType="number" />
-
-        <EditText
-            android:id="@+id/input_break_time"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Czas przerwy (sekundy)"
-            android:inputType="number" />
-
-        <EditText
-            android:id="@+id/input_rounds_count"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Liczba rund"
-            android:inputType="number" />
-
         <Button
-            android:id="@+id/button_start_timer"
+            android:id="@+id/button_open_timer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Uruchom stoper" />
+            android:text="Przejdź do stopera" />
+
     </LinearLayout>
 </ScrollView>

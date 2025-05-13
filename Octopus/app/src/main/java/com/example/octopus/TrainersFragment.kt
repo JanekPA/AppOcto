@@ -153,7 +153,8 @@ class TrainersFragment : Fragment() {
             .setPositiveButton("Dodaj") { _, _ ->
                 val name = nameInput.text.toString()
                 val surname = surnameInput.text.toString()
-                val key = "$name $surname"
+                val email = emailInput.text.toString().replace(".",",")
+                val key = email
 
                 val trainerData = mapOf(
                     "name" to name,
@@ -210,7 +211,7 @@ class TrainersFragment : Fragment() {
         datePickerDialog.show()
     }
     private fun loadAvailableHoursForDate(trainer: Trainer, date: String) {
-        val trainerKey = "${trainer.name} ${trainer.surname}"
+        val trainerKey = "${trainer.email}".replace(".",",")
 
         scheduleRef.child(trainerKey).child(date).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -357,13 +358,13 @@ class TrainersFragment : Fragment() {
         surnameInput.setText(trainer.surname)
 
         val linePhoneNumber = trainer.phoneNumber!!.split("\n")
-        val lineEmailInput = trainer.email!!.split("\n")
-        val lineFacebookInput = trainer.facebook!!.split("\n")
-        val lineInstagramInput = trainer.instagram!!.split("\n")
+        val lineEmailInput = trainer.email.toString()
+        val lineFacebookInput = trainer.facebook.toString()
+        val lineInstagramInput = trainer.instagram.toString()
         phoneInput.setText(linePhoneNumber.getOrNull(0)?.removePrefix("📞 ") ?: "")
-        emailInput.setText(lineEmailInput.getOrNull(1)?.removePrefix("✉️ ") ?: "")
-        facebookInput.setText(lineFacebookInput.getOrNull(2)?.removePrefix("📘 ") ?: "")
-        instagramInput.setText(lineInstagramInput.getOrNull(3)?.removePrefix("📸 ") ?: "")
+        emailInput.setText(lineEmailInput)
+        facebookInput.setText(lineFacebookInput)
+        instagramInput.setText(lineInstagramInput)
 
         val selectedTypes = trainer.classTypes.toMutableList()
         val selectedLevels = trainer.groupLevels.toMutableList()
@@ -421,10 +422,10 @@ class TrainersFragment : Fragment() {
             .setTitle("Edytuj dane trenera")
             .setView(dialogView)
             .setPositiveButton("Zapisz") { _, _ ->
-                val key = "${trainer.name} ${trainer.surname}"
+                val key = "${trainer.email}".replace(".",",")
                 val newName = nameInput.text.toString()
                 val newSurname = surnameInput.text.toString()
-                val newKey = "$newName $newSurname"
+                val newKey = "${trainer.email}".replace(".",",")
 
                 val updatedData = mapOf(
                     "name" to newName,
@@ -516,7 +517,7 @@ class TrainersFragment : Fragment() {
             .setView(dialogView)
             .setPositiveButton("Zapisz") { _, _ ->
                 if (selectedDate != null && selectedHours.isNotEmpty()) {
-                    val trainerKey = "${trainer.name} ${trainer.surname}"
+                    val trainerKey = "${trainer.email}".replace(".",",")
                     val trainerDateRef = database.getReference("scheduleTrainers").child(trainerKey).child(selectedDate!!)
                     selectedHours.forEachIndexed { index, hour ->
                         trainerDateRef.child(index.toString()).setValue(hour)

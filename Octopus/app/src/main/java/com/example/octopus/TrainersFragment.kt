@@ -11,12 +11,14 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
+import java.util.UUID
 
 
 class TrainersFragment : Fragment() {
@@ -79,8 +81,82 @@ class TrainersFragment : Fragment() {
         }
 
         reserveButton.setOnClickListener {
-            Toast.makeText(requireContext(), "Rezerwacja w przygotowaniu", Toast.LENGTH_SHORT).show()
+            val currentUser = FirebaseAuth.getInstance().currentUser
+            val userUid = currentUser?.uid ?: return@setOnClickListener
+            val database = FirebaseDatabase.getInstance().reference
+
+            // Sprawdź dane użytkownika
+            database.child("UsersPersonalization").child(userUid)
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val email = snapshot.child("email").getValue(String::class.java)
+                        val name = snapshot.child("name").getValue(String::class.java)
+                        val surname = snapshot.child("surname").getValue(String::class.java)
+                        val phone = snapshot.child("phoneNumber").getValue(String::class.java)
+
+                        if (email.isNullOrEmpty() || name.isNullOrEmpty() || surname.isNullOrEmpty() || phone.isNullOrEmpty()) {
+                            Toast.makeText(requireContext(), "Uzupełnij dane w profilu przed rezerwacją!", Toast.LENGTH_LONG).show()
+                            return
+                        }
+
+                        // Tutaj wybierasz np. datę/godzinę/trenera z UI
+                        val selectedTrainerEmail = selectedTrainer?.email
+                        val selectedDate = selectedDate
+                        val selectedHour = selectedHour
+
+                        // Pobierz UID trenera na podstawie emaila
+                        database.child("UsersPersonalization").orderByChild("email").equalTo(selectedTrainerEmail)
+                            .addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onDataChange(trainerSnap: DataSnapshot) {
+                                    val trainerUid = trainerSnap.children.firstOrNull()?.key
+                                    if (trainerUid == null) {
+                                        Toast.makeText(requireContext(), "Nie znaleziono trenera.", Toast.LENGTH_SHORT).show()
+                                        return
+                                    }
+                                    val reservationId = database.child("ReservedTrainings").child("Pending").push().key ?: UUID.randomUUID().toString()
+
+                                    val reservationData = mapOf(
+                                        "firstName" to name,
+                                        "lastName" to surname,
+                                        "trainerName" to selectedTrainer!!.name,
+                                        "trainerSurname" to selectedTrainer!!.surname,
+                                        "phoneNumber" to phone,
+                                        "userUid" to userUid,
+                                        "userEmail" to email,
+                                        "trainerUid" to trainerUid,
+                                        "trainerEmail" to selectedTrainerEmail,
+                                        "date" to selectedDate,
+                                        "time" to selectedHour
+                                    )
+
+                                    database.child("ReservedTrainings").child("Pending").child(reservationId)
+                                        .setValue(reservationData)
+
+                                    // Dodaj powiadomienie dla trenera
+                                    val timestamp = System.currentTimeMillis()
+                                    val notifId = database.child("Notifications").child(trainerUid).push().key ?: UUID.randomUUID().toString()
+
+                                    val notif = mapOf(
+                                        "title" to "Nowa rezerwacja treningu",
+                                        "message" to "$email zarezerwował trening na $selectedDate o $selectedHour.",
+                                        "reservationId" to reservationId,
+                                        "timestamp" to timestamp,
+                                        "type" to "training_reservation"
+                                    )
+
+                                    database.child("Notifications").child(trainerUid).child(notifId).setValue(notif)
+
+                                    Toast.makeText(requireContext(), "Rezerwacja została złożona", Toast.LENGTH_SHORT).show()
+                                }
+
+                                override fun onCancelled(error: DatabaseError) {}
+                            })
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {}
+                })
         }
+
 
         pickDateButton.setOnClickListener {
             showDatePickerDialog()
@@ -211,21 +287,58 @@ class TrainersFragment : Fragment() {
         datePickerDialog.show()
     }
     private fun loadAvailableHoursForDate(trainer: Trainer, date: String) {
-        val trainerKey = "${trainer.email}".replace(".",",")
-
+        val trainerKey = trainer.email!!.replace(".", ",")
+        val formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
         scheduleRef.child(trainerKey).child(date).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val hours = snapshot.children.mapNotNull { it.getValue(String::class.java) }
-                hoursAdapter = HoursAdapter(hours) { hour ->
-                    selectedHour = hour
-                    reserveButton.isEnabled = true
+                val allHours = snapshot.children.mapNotNull { it.getValue(String::class.java) }.toMutableList()
+
+                // Funkcja pomocnicza do pobierania z Pending i Confirmed
+                fun getReservedHours(statusPath: String, onComplete: (List<String>) -> Unit) {
+                    val ref = FirebaseDatabase.getInstance().getReference("ReservedTrainings").child(statusPath)
+                    ref.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            val reserved = snapshot.children.mapNotNull { res ->
+                                val resTrainerEmail = res.child("trainerEmail").getValue(String::class.java)
+                                val resDate = res.child("date").getValue(String::class.java)
+                                val resTime = res.child("time").getValue(String::class.java)
+
+                                if (resTrainerEmail == trainer.email && resDate == date) resTime else null
+                            }
+                            onComplete(reserved)
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {}
+                    })
                 }
-                hoursRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-                hoursRecyclerView.adapter = hoursAdapter
+
+                // Pobierz z obu: Pending i Confirmed
+                getReservedHours("Pending") { pendingHours ->
+                    getReservedHours("Confirmed") { confirmedHours ->
+                        val allReserved = pendingHours + confirmedHours
+                        val availableHours = allHours.filter { it !in allReserved }
+                        val sortedHours = availableHours.sortedBy {
+                            try {
+                                LocalTime.parse(it, formatter)
+                            } catch (e: Exception) {
+                                LocalTime.MIDNIGHT
+                            }
+                        }
+                        hoursAdapter = HoursAdapter(sortedHours) { hour ->
+                            selectedHour = hour
+                            reserveButton.isEnabled = true
+                        }
+                        hoursRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+                        hoursRecyclerView.adapter = hoursAdapter
+                    }
+                }
             }
+
             override fun onCancelled(error: DatabaseError) {}
         })
     }
+
+
     private fun loadClassTypes() {
         classTypesRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -255,6 +368,7 @@ class TrainersFragment : Fragment() {
         contactTextView.text = "Wybierz trenera, aby uzyskać kontakt!"
         hoursRecyclerView.adapter = null
         reserveButton.isEnabled = false
+
         val selectedType = trainingTypeSpinner.selectedItem?.toString()?.trim()
         val selectedLevel = groupLevelSpinner.selectedItem?.toString()?.trim()
 
@@ -286,60 +400,106 @@ class TrainersFragment : Fragment() {
                     val types = child.child("classTypes").children.mapNotNull { it.getValue(String::class.java)?.trim() }
                     val levels = child.child("groupLevels").children.mapNotNull { it.getValue(String::class.java)?.trim() }
 
-
                     val availabilityRef = database.getReference("scheduleTrainers").child(child.key!!)
-                    availabilityRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(avSnapshot: DataSnapshot) {
-                            val formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
-                            val availability = mutableMapOf<String, List<String>>()
+                    val formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
+                    val availability = mutableMapOf<String, List<String>>()
 
-                            for (dateSnapshot in avSnapshot.children) {
-                                val date = dateSnapshot.key ?: continue
-                                val hours = dateSnapshot.children.mapNotNull { it.getValue(String::class.java) }
-                                    .distinct()
-                                    .sortedBy {
-                                        try {
-                                            LocalTime.parse(it, formatter)
-                                        } catch (e: Exception) {
-                                            LocalTime.MIDNIGHT
+                    val reservedPendingRef = database.getReference("ReservedTrainings/Pending")
+                    val reservedConfirmedRef = database.getReference("ReservedTrainings/Confirmed")
+
+                    reservedPendingRef.orderByChild("trainerEmail").equalTo(email)
+                        .addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(pendingSnapshot: DataSnapshot) {
+                                val pendingSet = pendingSnapshot.children.mapNotNull {
+                                    val date = it.child("date").getValue(String::class.java)
+                                    val time = it.child("time").getValue(String::class.java)
+                                    if (date != null && time != null) "$date|$time" else null
+                                }.toSet()
+
+                                reservedConfirmedRef.orderByChild("trainerEmail").equalTo(email)
+                                    .addListenerForSingleValueEvent(object : ValueEventListener {
+                                        override fun onDataChange(confirmedSnapshot: DataSnapshot) {
+                                            val confirmedSet = confirmedSnapshot.children.mapNotNull {
+                                                val date = it.child("date").getValue(String::class.java)
+                                                val time = it.child("time").getValue(String::class.java)
+                                                if (date != null && time != null) "$date|$time" else null
+                                            }.toSet()
+
+                                            val reservedSet = pendingSet + confirmedSet
+
+                                            availabilityRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                                                override fun onDataChange(avSnapshot: DataSnapshot) {
+                                                    for (dateSnapshot in avSnapshot.children) {
+                                                        val date = dateSnapshot.key ?: continue
+                                                        val allHours = dateSnapshot.children.mapNotNull { it.getValue(String::class.java) }
+
+                                                        val availableHours = allHours.filter { hour ->
+                                                            "$date|$hour" !in reservedSet
+                                                        }.distinct().sortedBy {
+                                                            try {
+                                                                LocalTime.parse(it, formatter)
+                                                            } catch (e: Exception) {
+                                                                LocalTime.MIDNIGHT
+                                                            }
+                                                        }
+
+                                                        if (availableHours.isNotEmpty()) {
+                                                            availability[date] = availableHours
+                                                        }
+                                                    }
+
+                                                    filteredList.add(
+                                                        Trainer(name, surname, email, facebook, phone, instagram, availability, types, levels)
+                                                    )
+                                                    loadedCount++
+                                                    if (loadedCount == filteredChildren.size) {
+                                                        setupTrainerRecycler(filteredList)
+                                                        val stillExists = filteredList.any {
+                                                            it.name == selectedTrainer?.name && it.surname == selectedTrainer?.surname
+                                                        }
+                                                        if (!stillExists) {
+                                                            selectedTrainer = null
+                                                            selectedHour = null
+                                                            contactTextView.text = "Wybierz trenera, aby uzyskać kontakt!"
+                                                            hoursAdapter = HoursAdapter(emptyList()) { }
+                                                            hoursRecyclerView.adapter = hoursAdapter
+                                                            reserveButton.isEnabled = false
+                                                        }
+                                                    }
+                                                }
+
+                                                override fun onCancelled(error: DatabaseError) {
+                                                    loadedCount++
+                                                    if (loadedCount == filteredChildren.size) {
+                                                        setupTrainerRecycler(filteredList)
+                                                    }
+                                                }
+                                            })
                                         }
-                                    }
-                                availability[date] = hours
+
+                                        override fun onCancelled(error: DatabaseError) {
+                                            loadedCount++
+                                            if (loadedCount == filteredChildren.size) {
+                                                setupTrainerRecycler(filteredList)
+                                            }
+                                        }
+                                    })
                             }
 
-
-                            filteredList.add(Trainer(name, surname, email, facebook, phone, instagram, availability, types, levels))
-                            loadedCount++
-                            if (loadedCount == filteredChildren.size) {
-                                setupTrainerRecycler(filteredList)
-                                val stillExists = filteredList.any {
-                                    it.name == selectedTrainer?.name && it.surname == selectedTrainer?.surname
-                                }
-                                if (!stillExists) {
-                                    selectedTrainer = null
-                                    selectedHour = null
-                                    contactTextView.text = "Wybierz trenera, aby uzyskać kontakt!"
-                                    hoursAdapter = HoursAdapter(emptyList()) { }
-                                    hoursRecyclerView.adapter = hoursAdapter
-                                    reserveButton.isEnabled = false
+                            override fun onCancelled(error: DatabaseError) {
+                                loadedCount++
+                                if (loadedCount == filteredChildren.size) {
+                                    setupTrainerRecycler(filteredList)
                                 }
                             }
-
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {
-                            loadedCount++
-                            if (loadedCount == filteredChildren.size) {
-                                setupTrainerRecycler(filteredList)
-                            }
-                        }
-                    })
+                        })
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {}
         })
     }
+
 
 
 

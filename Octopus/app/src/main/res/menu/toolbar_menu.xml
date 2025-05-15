@@ -2,9 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/menu_notifications"
+        android:id="@+id/action_notifications"
         android:icon="@drawable/ic_notification"
         android:title="Powiadomienia"
+        app:actionLayout="@layout/menu_notification_badge"
         app:showAsAction="always" />
     <item
         android:id="@+id/menu_toggle"

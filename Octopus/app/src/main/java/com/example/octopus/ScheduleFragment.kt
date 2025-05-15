@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import java.util.Calendar
 
 class ScheduleFragment : Fragment() {
 
@@ -82,7 +83,8 @@ class ScheduleFragment : Fragment() {
                     groupLevel = newGroupLevel,
                     room = room,
                     time = newTime,
-                    id = itemId // <-- ważne
+                    id = itemId, // <-- ważne
+                    day = selectedDay
                 )
                 scheduleRef.child(selectedDay).child(itemId).setValue(updatedItem)
             }
@@ -187,7 +189,8 @@ class ScheduleFragment : Fragment() {
                     groupLevel = groupLevel,
                     room = room,
                     time = time,
-                    id = newId
+                    id = newId,
+                    day = selectedDay
                 )
 
                 scheduleRef.child(selectedDay).child(newId).setValue(scheduleItem)
@@ -288,16 +291,5 @@ class ScheduleFragment : Fragment() {
         }
     }
 
-    fun formatTimeInput(input: String): String {
-        return input.split("-").joinToString("-") { part ->
-            val timeParts = part.trim().split(":")
-            if (timeParts.size == 2) {
-                val hour = timeParts[0].padStart(2, '0')
-                val minute = timeParts[1].padStart(2, '0')
-                "$hour:$minute"
-            } else {
-                part.trim()
-            }
-        }
-    }
+
 }

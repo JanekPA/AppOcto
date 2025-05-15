@@ -7,5 +7,6 @@ data class ScheduleItem(
     val groupLevel: String? = null,
     val room: String = "",
     val time: String = "",
-    var id: String = "" // <- lokalnie w kodzie, do operacji
+    var id: String = "", // <- lokalnie w kodzie, do operacji
+    var day: String = ""
 )

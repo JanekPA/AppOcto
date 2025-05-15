@@ -235,7 +235,6 @@ class CheckAvailabilityFragment : Fragment() {
                         loadItems()
                         dialog.dismiss()
                     }
-                val userRoleRef = database.child("UsersPersonalization")
                 database.child("UsersPersonalization").orderByKey().equalTo(user.uid).addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         for (userSnap in snapshot.children) {
@@ -254,7 +253,8 @@ class CheckAvailabilityFragment : Fragment() {
                                                     "title" to "Nowa rezerwacja",
                                                     "message" to "Użytkownik ${user.email} ($firstName $lastName) złożył zamówienie.",
                                                     "reservationId" to reservationId,
-                                                    "timestamp" to System.currentTimeMillis()
+                                                    "timestamp" to System.currentTimeMillis(),
+                                                    "type" to "item_reservation"
                                                 )
 
                                                 database.child("Notifications").child(adminUid).child(notifId).setValue(notification)

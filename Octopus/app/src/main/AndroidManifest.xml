@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
         android:name=".App"
@@ -13,7 +14,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Octopus"
         tools:targetApi="31"
+
         >
+
+        <service
+            android:name="androidx.work.impl.background.systemjob.SystemJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="false"
+            tools:replace="android:exported"/>
         <activity
             android:name=".MainActivity"
             android:exported="true">

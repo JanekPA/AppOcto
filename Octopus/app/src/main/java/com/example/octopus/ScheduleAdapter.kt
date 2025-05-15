@@ -1,5 +1,9 @@
 package com.example.octopus
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +14,9 @@ import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.collection.emptyLongSet
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import java.util.Calendar
 
 class ScheduleAdapter(
     private var scheduleMap: Map<String, ScheduleItem>,
@@ -18,14 +24,15 @@ class ScheduleAdapter(
 ) : RecyclerView.Adapter<ScheduleAdapter.ScheduleViewHolder>() {
 
     // Posortowana lista zajęć według godziny rozpoczęcia
-    private val scheduleList get() = scheduleMap.toList().sortedBy {
-        val time = it.second.time ?: ""
-        val start = time.split("-").firstOrNull()?.trim() ?: "99:99"
-        val parts = start.split(":")
-        val hour = parts.getOrNull(0)?.toIntOrNull() ?: 99
-        val minute = parts.getOrNull(1)?.toIntOrNull() ?: 99
-        hour * 60 + minute
-    }
+    private val scheduleList
+        get() = scheduleMap.toList().sortedBy {
+            val time = it.second.time ?: ""
+            val start = time.split("-").firstOrNull()?.trim() ?: "99:99"
+            val parts = start.split(":")
+            val hour = parts.getOrNull(0)?.toIntOrNull() ?: 99
+            val minute = parts.getOrNull(1)?.toIntOrNull() ?: 99
+            hour * 60 + minute
+        }
 
 
     class ScheduleViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -36,7 +43,8 @@ class ScheduleAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScheduleViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.schedule_item, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.schedule_item, parent, false)
         return ScheduleViewHolder(view)
     }
 
@@ -49,30 +57,82 @@ class ScheduleAdapter(
             "${item.classType} gr. ${item.groupLevel}"
         else
             item.classType
-        var isFavorite = false;
-        holder.time.text = item.time
-        holder.itemView.setOnClickListener { onItemClicked(id, item)
-            }
-        holder.favoriteButton.setOnClickListener {
-            if (!isFavorite) {
-                holder.favoriteButtonBackground.setBackgroundResource(R.drawable.favorite_background_selected)
-                isFavorite = true
-                Toast.makeText(
-                    holder.itemView.context,
-                    "Zajęcie zostało dodane do ulubionych!",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-            else{
-                holder.favoriteButtonBackground.setBackgroundResource(R.drawable.favorite_background_default)
+        val user = FirebaseAuth.getInstance().currentUser
+        val favKey = "${item.classType}_${item.groupLevel}_${item.time}"
+        var isFavorite = false
+
+        if (user != null) {
+            val uid = user.uid
+            val favRef = FirebaseDatabase.getInstance()
+                .getReference("UsersPersonalization")
+                .child(uid)
+                .child("FavouriteClasses")
+                .child(favKey)
+
+            favRef.get().addOnSuccessListener { snapshot ->
+                if (snapshot.exists()) {
+                    isFavorite = true
+                    holder.favoriteButtonBackground.setBackgroundResource(R.drawable.favorite_background_selected)
+                } else {
+                    isFavorite = false
+                    holder.favoriteButtonBackground.setBackgroundResource(R.drawable.favorite_background_default)
+                }
+            }.addOnFailureListener {
+                // Jeśli nie można pobrać danych – ustaw jako nieulubione
                 isFavorite = false
-                Toast.makeText(
-                    holder.itemView.context,
-                    "Zajęcie zostało usunięte z ulubionych!",
-                    Toast.LENGTH_SHORT
-                ).show()
+                holder.favoriteButtonBackground.setBackgroundResource(R.drawable.favorite_background_default)
             }
         }
+
+        if (user == null) {
+            holder.favoriteButton.visibility = View.GONE
+            holder.favoriteButtonBackground.visibility = View.GONE
+        } else {
+            holder.favoriteButton.visibility = View.VISIBLE
+            holder.favoriteButtonBackground.visibility = View.VISIBLE
+        }
+        holder.time.text = item.time
+        holder.itemView.setOnClickListener {
+            onItemClicked(id, item)
+        }
+        holder.favoriteButton.setOnClickListener {
+            val user = FirebaseAuth.getInstance().currentUser
+            if (user != null) {
+                val uid = user.uid
+                val favRef = FirebaseDatabase.getInstance()
+                    .getReference("UsersPersonalization")
+                    .child(uid)
+                    .child("FavouriteClasses")
+                val favKey = "${item.classType}_${item.groupLevel}_${item.time}"
+
+                if (!isFavorite) {
+                    val favData = mapOf(
+                        "classType" to item.classType,
+                        "groupLevel" to item.groupLevel,
+                        "day" to id,
+                        "hour" to item.time
+                    )
+                    favRef.child(favKey).setValue(favData)
+                    holder.favoriteButtonBackground.setBackgroundResource(R.drawable.favorite_background_selected)
+                    Toast.makeText(
+                        holder.itemView.context,
+                        "Zajęcie zostało dodane do ulubionych!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    isFavorite = true
+                } else {
+                    favRef.child(favKey).removeValue()
+                    holder.favoriteButtonBackground.setBackgroundResource(R.drawable.favorite_background_default)
+                    Toast.makeText(
+                        holder.itemView.context,
+                        "Zajęcie zostało usunięte z ulubionych!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    isFavorite = false
+                }
+            }
+        }
+
     }
 
     override fun getItemCount(): Int = scheduleList.size
@@ -81,6 +141,7 @@ class ScheduleAdapter(
         scheduleMap = newMap
         notifyDataSetChanged()
     }
+
     private fun getBackgroundColor(classType: String?, groupLevel: String?): Int {
         return when (classType?.lowercase()) {
             "mma" -> when (groupLevel?.lowercase()) {
@@ -89,6 +150,7 @@ class ScheduleAdapter(
                 "pro" -> Color.parseColor("#444444")
                 else -> Color.parseColor("#EAEAEA")
             }
+
             "bjj" -> when (groupLevel?.lowercase()) {
                 "początkująca" -> Color.parseColor("#D0E7FF")
                 "łączona" -> Color.parseColor("#7DBBFF")
@@ -97,6 +159,7 @@ class ScheduleAdapter(
                 "kids", "family" -> Color.parseColor("#CFFFE5")
                 else -> Color.parseColor("#7DBBFF")
             }
+
             "zapasy" -> Color.parseColor("#FF9999")
             "no-gi" -> Color.parseColor("#5D9CEC")
             "boks" -> when (groupLevel?.lowercase()) {
@@ -105,6 +168,7 @@ class ScheduleAdapter(
                 "łączona" -> Color.parseColor("#FFEB3B")
                 else -> Color.parseColor("#FFEB3B")
             }
+
             "kick-boxing" -> when (groupLevel?.lowercase()) {
                 "junior" -> Color.parseColor("#CCFFCC")
                 "łączona" -> Color.parseColor("#66CC66")
@@ -112,10 +176,10 @@ class ScheduleAdapter(
                 "średnio zaawansowana", "pro" -> Color.parseColor("#2E7D32")
                 else -> Color.parseColor("#66CC66")
             }
+
             "wolna mata" -> Color.parseColor("#E1BEE7")
             else -> Color.LTGRAY
         }
     }
-
 
 }

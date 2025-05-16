@@ -17,6 +17,10 @@
     <item android:id="@+id/for_trainers"
         android:title="Dla trenerów"
         android:visible="false"/>
+    <item
+        android:id="@+id/nav_admin_panel"
+        android:title="Panel Admina"
+        android:visible="false" />
     <item android:id="@+id/nav_settings"
         android:title="Ustawienia" />
     <item android:id="@+id/nav_help"

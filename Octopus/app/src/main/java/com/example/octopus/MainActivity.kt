@@ -108,6 +108,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_settings -> navController.navigate(R.id.settingsFragment)
                 R.id.nav_help -> navController.navigate(R.id.helpFragment)
                 R.id.for_trainers -> navController.navigate(R.id.forTrainersFragment)
+                R.id.nav_admin_panel -> navController.navigate(R.id.forAdminFragment)
                 R.id.nav_logout -> {
                     FirebaseAuth.getInstance().signOut()
                     drawerLayout.closeDrawer(GravityCompat.END)
@@ -569,7 +570,7 @@ class MainActivity : AppCompatActivity() {
         val userProfileItem = menu.findItem(R.id.nav_profile)
         val headerView = navView.getHeaderView(0)
         val headerText = headerView.findViewById<TextView>(R.id.nav_header_text)
-
+        val forAdminItem = menu.findItem(R.id.nav_admin_panel)
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
             // Użytkownik zalogowany
@@ -585,6 +586,10 @@ class MainActivity : AppCompatActivity() {
                         if (role == "trainer")
                         {
                             forTrainersItem.isVisible = true
+                        }
+                        else if (role == "admin")
+                        {
+                            forAdminItem.isVisible = true
                         }
                     }
                     else{

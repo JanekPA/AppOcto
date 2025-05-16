@@ -1,0 +1,13 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/admin_panel_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/calendar_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Kalendarz klubowy" />
+</LinearLayout>

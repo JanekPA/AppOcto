@@ -62,7 +62,18 @@
         android:id="@+id/settingsFragment"
         android:name="com.example.octopus.SettingsFragment"
         android:label="Ustawienia" />
-
+    <fragment
+        android:id="@+id/calendarforadminFragment"
+        android:name="com.example.octopus.CalendarForAdminFragment"
+        android:label="Kalendarz Zajęciowy"/>
+    <fragment
+        android:id="@+id/forAdminFragment"
+        android:name="com.example.octopus.AdminPanelFragment"
+        android:label="Panel Admina">
+    <action
+        android:id="@+id/action_adminPanel_to_calendarFragment"
+        app:destination="@id/calendarforadminFragment" />
+    </fragment>
     <fragment
         android:id="@+id/pricingFragment"
         android:name="com.example.octopus.PricingFragment"

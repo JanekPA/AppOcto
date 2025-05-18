@@ -36,6 +36,13 @@
             android:layout_height="wrap_content"
             android:hint="Prowadzący"
             android:inputType="textPersonName" />
+        <EditText
+            android:id="@+id/participants_count_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Liczba uczestników"
+            android:inputType="number"
+            android:layout_marginTop="4dp" />
 
         <CheckBox
             android:id="@+id/paid_checkbox"

@@ -73,6 +73,10 @@
     <action
         android:id="@+id/action_adminPanel_to_calendarFragment"
         app:destination="@id/calendarforadminFragment" />
+    <action
+        android:id="@+id/action_adminPanel_to_statisticsFragment"
+        app:destination="@id/statisticsFragment"
+        />
     </fragment>
     <fragment
         android:id="@+id/pricingFragment"
@@ -117,5 +121,11 @@
         <argument
             android:name="groupLevel"
             app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/statisticsFragment"
+        android:name="com.example.octopus.StatisticsFragment"
+        android:label="Panel Statystyk">
+
     </fragment>
 </navigation>

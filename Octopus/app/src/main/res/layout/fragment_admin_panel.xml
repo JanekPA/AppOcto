@@ -10,4 +10,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Kalendarz klubowy" />
+    <Button
+        android:id="@+id/stats_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Statystyki"
+        android:layout_marginTop="16dp"/>
 </LinearLayout>

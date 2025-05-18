@@ -29,6 +29,7 @@ class TrainingEntryAdapter : RecyclerView.Adapter<TrainingEntryAdapter.ViewHolde
         val trainerEdit: EditText = view.findViewById(R.id.trainer_edit)
         val paidCheckbox: CheckBox = view.findViewById(R.id.paid_checkbox)
         val saveButton: Button = view.findViewById(R.id.save_button)
+        val participantsEdit: EditText = view.findViewById(R.id.participants_count_edit)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -51,7 +52,7 @@ class TrainingEntryAdapter : RecyclerView.Adapter<TrainingEntryAdapter.ViewHolde
 // Ustaw dane zawsze niezależnie od stanu
         holder.trainerEdit.setText(entry.trainer)
         holder.paidCheckbox.isChecked = entry.paid
-
+        holder.participantsEdit.setText(entry.participantsCount.toString())
 // Ustaw tryb edycji lub podglądu w zależności od isSaved
         if (entry.isSaved) {
             setFieldsEditable(holder, false)
@@ -79,34 +80,42 @@ class TrainingEntryAdapter : RecyclerView.Adapter<TrainingEntryAdapter.ViewHolde
                     .child("trainings")
                     .child(entry.id)
 
+                val participantsCount = holder.participantsEdit.text.toString().toIntOrNull() ?: 0
+
                 statRef.setValue(
                     mapOf(
                         "trainer" to trainerName,
                         "paymentReceived" to paid,
+                        "participantsCount" to participantsCount,
                         "classType" to entry.classType,
                         "groupLevel" to entry.groupLevel
                     )
                 ).addOnSuccessListener {
                     entry.trainer = trainerName
                     entry.paid = paid
+                    entry.participantsCount = participantsCount
                     entry.isSaved = true
                     Toast.makeText(holder.itemView.context, "Zapisano", Toast.LENGTH_SHORT).show()
                     setFieldsEditable(holder, false)
                     holder.saveButton.text = "Edytuj"
                 }
+
             }
         }
         if (isSummaryMode) {
             holder.trainerEdit.visibility = View.GONE
             holder.paidCheckbox.visibility = View.GONE
             holder.saveButton.visibility = View.GONE
+            holder.participantsEdit.visibility = View.GONE
             // zamiast tego pokażemy tylko informacyjne TextView np.:
-            holder.nameText.text = "${entry.classType}_${entry.groupLevel} | Trener: ${entry.trainer} | ${if (entry.paid) "Wypłacone" else "Nie wypłacone"}"
+            holder.nameText.text = "${entry.classType}_${entry.groupLevel} | Trener: ${entry.trainer} | ${if (entry.paid) "Wypłacone" else "Nie wypłacone"} | Uczestnicy: ${entry.participantsCount}"
         } else {
             holder.trainerEdit.visibility = View.VISIBLE
             holder.paidCheckbox.visibility = View.VISIBLE
             holder.saveButton.visibility = View.VISIBLE
-            holder.nameText.text = "${entry.classType}_${entry.groupLevel}"
+            holder.participantsEdit.visibility = View.VISIBLE
+            holder.nameText.text = "${entry.classType}_${entry.groupLevel} | Trener: ${entry.trainer} | ${if (entry.paid) "Wypłacone" else "Nie wypłacone"} | Uczestnicy: ${entry.participantsCount}"
+
         }
     }
     private fun setFieldsEditable(holder: ViewHolder, editable: Boolean) {

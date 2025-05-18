@@ -7,5 +7,6 @@ data class TrainingEntry(
     val groupLevel: String,
     var trainer: String = "",
     var paid: Boolean = false,
+    var participantsCount: Int = 0,
     var isSaved: Boolean = false
 )

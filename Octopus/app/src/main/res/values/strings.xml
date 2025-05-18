@@ -13,6 +13,11 @@
         <item>Jasny</item>
         <item>Ciemny</item>
     </string-array>
+    <string-array name="statistics_types">
+        <item>Uczestnicy</item>
+        <item>Użytkownicy</item>
+        <item>Rezerwacje</item>
+    </string-array>
     <string-array name="rooms_array">
         <item>Mała Sala</item>
         <item>Duża Sala</item>

@@ -20,6 +20,10 @@ class AdminPanelFragment : Fragment() {
         calendarButton.setOnClickListener {
             findNavController().navigate(R.id.action_adminPanel_to_calendarFragment)
         }
+        val statsButton = view.findViewById<Button>(R.id.stats_button)
+        statsButton.setOnClickListener {
+            findNavController().navigate(R.id.action_adminPanel_to_statisticsFragment)
+        }
 
         return view
     }

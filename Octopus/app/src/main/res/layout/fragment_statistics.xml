@@ -1,0 +1,81 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/statistics_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Wybór typu statystyki -->
+        <TextView android:text="Rodzaj statystyk:"  android:layout_height="wrap_content" android:layout_width="wrap_content"/>
+        <Spinner
+            android:id="@+id/stat_type_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/statistics_types" />
+
+        <!-- Filtry wspólne -->
+        <TextView android:id="@+id/date_label" android:text="Data:" android:layout_height="wrap_content" android:layout_width="wrap_content" />
+        <EditText
+            android:id="@+id/date_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="np. 12.05.2025 - 30.05.2025"
+            android:inputType="text" />
+
+        <!-- Filtry dla uczestników -->
+        <LinearLayout android:id="@+id/participants_filters" android:orientation="vertical"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+
+            <TextView android:text="Sala:" android:layout_height="wrap_content" android:layout_width="wrap_content" />
+            <Spinner
+                android:id="@+id/room_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView android:text="Treningi (wiele wyborów):" android:layout_height="wrap_content" android:layout_width="wrap_content" />
+            <MultiAutoCompleteTextView
+                android:id="@+id/training_multi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textAutoComplete" />
+
+            <TextView android:text="Poziomy zaawansowania (wiele wyborów):" android:layout_height="wrap_content" android:layout_width="wrap_content" />
+            <MultiAutoCompleteTextView
+                android:id="@+id/level_multi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textAutoComplete" />
+        </LinearLayout>
+
+        <!-- Filtry dla rezerwacji -->
+        <LinearLayout android:id="@+id/reservations_filters" android:orientation="vertical"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+
+            <TextView android:text="Nazwa przedmiotu:" android:layout_height="wrap_content" android:layout_width="wrap_content" />
+            <EditText
+                android:id="@+id/item_name_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="np. Rękawice, Koszulka" />
+        </LinearLayout>
+
+        <!-- Wykres -->
+        <com.github.mikephil.charting.charts.BarChart
+            android:id="@+id/bar_chart"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_marginTop="16dp" />
+
+        <!-- Przycisk -->
+        <Button
+            android:id="@+id/load_stats_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Załaduj statystyki"
+            android:layout_marginTop="16dp" />
+    </LinearLayout>
+</ScrollView>

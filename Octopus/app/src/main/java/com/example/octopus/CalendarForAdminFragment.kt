@@ -25,8 +25,7 @@ class CalendarForAdminFragment : Fragment() {
     private lateinit var adapter: TrainingEntryAdapter
     private var currentDate: Calendar = Calendar.getInstance()
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-    private val dayFormat = SimpleDateFormat("EEEE", Locale("pl"))
-    var isSummaryView = false
+    var isSummaryView = true
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -39,8 +38,11 @@ class CalendarForAdminFragment : Fragment() {
         recyclerView = view.findViewById(R.id.training_list_recycler)
         noteEditText = view.findViewById(R.id.day_note_edit_text)
         saveNoteButton = view.findViewById(R.id.save_note_button)
-
+        val toggleSummaryButton: Button = view.findViewById(R.id.toggle_summary_button)
         adapter = TrainingEntryAdapter()
+        adapter.setSummaryMode(true)
+        toggleSummaryButton.text = "Edytuj dzień"
+
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.adapter = adapter
 
@@ -65,7 +67,7 @@ class CalendarForAdminFragment : Fragment() {
                     Toast.makeText(requireContext(), "Notatka zapisana", Toast.LENGTH_SHORT).show()
                 }
         }
-        val toggleSummaryButton: Button = view.findViewById(R.id.toggle_summary_button)
+
 
         toggleSummaryButton.setOnClickListener {
             isSummaryView = !isSummaryView
@@ -156,7 +158,8 @@ class CalendarForAdminFragment : Fragment() {
                             val statData = statSnapshot.child(training.id)
                             training.copy(
                                 trainer = statData.child("trainer").getValue(String::class.java) ?: "",
-                                paid = statData.child("paymentReceived").getValue(Boolean::class.java) ?: false
+                                paid = statData.child("paymentReceived").getValue(Boolean::class.java) ?: false,
+                                participantsCount = statData.child("participantsCount").getValue(Int::class.java) ?: 0
                             )
                         }
 

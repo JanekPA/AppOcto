@@ -11,6 +11,7 @@ import android.widget.Spinner
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import java.util.Locale
+import androidx.core.content.edit
 
 class SettingsFragment : Fragment() {
 
@@ -45,7 +46,7 @@ class SettingsFragment : Fragment() {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val newLang = languageCodes[position]
                 if (newLang != prefslang.getString("language", "pl")) {
-                    prefslang.edit().putString("language", newLang).apply()
+                    prefslang.edit { putString("language", newLang) }
                     setLocale(newLang)
                     requireActivity().recreate()
                 }

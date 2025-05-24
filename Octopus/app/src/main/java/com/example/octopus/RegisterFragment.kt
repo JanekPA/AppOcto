@@ -12,6 +12,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class RegisterFragment : Fragment() {
 
@@ -42,6 +45,7 @@ class RegisterFragment : Fragment() {
             val pass = binding.textRegisterpassword.text.toString()
             val username = binding.textUsername.text.toString()
             val role = "user"
+            val currentTime = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault()).format(Date())
             if (!isValidEmail(email)) {
                 Toast.makeText(requireContext(), "Nieprawidłowy format e-maila", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -61,7 +65,8 @@ class RegisterFragment : Fragment() {
                                     "name" to name,
                                     "username" to username,
                                     "email" to email,
-                                    "role" to role
+                                    "role" to role,
+                                    "registerTime" to currentTime
                                 )
 
                                 firebaseRef.setValue(userMap)

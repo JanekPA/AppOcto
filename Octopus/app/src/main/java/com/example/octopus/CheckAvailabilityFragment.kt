@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import java.text.SimpleDateFormat
 import java.util.*
 
 class CheckAvailabilityFragment : Fragment() {
@@ -200,6 +201,7 @@ class CheckAvailabilityFragment : Fragment() {
                 val phone = phoneEditText.text.toString()
                 val payment = paymentSpinner.selectedItem?.toString() ?: "Nie wybrano"
                 val quantity = quantityEditText.text.toString().toIntOrNull() ?: 1
+                val currentTime = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault()).format(Date())
 
                 if (quantity > item.quantity) {
                     Toast.makeText(requireContext(), "Nie ma tylu sztuk dostępnych", Toast.LENGTH_SHORT).show()
@@ -216,6 +218,7 @@ class CheckAvailabilityFragment : Fragment() {
                     "payment" to payment,
                     "quantity" to quantity,
                     "pickupDate" to pickupDateEditText.text.toString(),
+                    "registerTime" to currentTime,
                     "price" to item.price,
                     "status" to "W trakcie realizacji"
                 )

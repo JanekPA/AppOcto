@@ -2,6 +2,7 @@ package com.example.octopus
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +21,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
@@ -105,19 +107,53 @@ class StatisticsFragment : Fragment() {
                         selectedTrainings,
                         selectedLevels
                     ) { data ->
-                        println("STATISTICS: $data") // <- sprawdzisz w logach czy coś zwraca
                         updateBarChart(data)
                     }
 
                 }
 
-                "Użytkownicy aplikacji" -> {
-                    // TODO: implementacja
+                "Użytkownicy" -> {
+                    val dateRange = parseDateRange(dateInput.text.toString())
+                    if (dateRange.isEmpty()) {
+                        Toast.makeText(requireContext(), "Nieprawidłowy format daty", Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+
+                    val localDates = dateRange.map { date ->
+                        LocalDate.of(date.year + 1900, date.month + 1, date.date)
+                    }
+
+                    val startDate = localDates.first()
+                    val endDate = localDates.last()
+
+                    loadUserRegistrationStats(startDate, endDate) { data ->
+                        updateBarChart(data)
+                    }
                 }
 
+
                 "Rezerwacje" -> {
-                    // TODO: implementacja
+                    val dateRange = parseDateRange(dateInput.text.toString())
+                    if (dateRange.isEmpty()) {
+                        Toast.makeText(requireContext(), "Nieprawidłowy format daty", Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+
+                    val localDates = dateRange.map { date ->
+                        LocalDate.of(date.year + 1900, date.month + 1, date.date)
+                    }
+
+                    val startDate = localDates.first()
+                    val endDate = localDates.last()
+
+                    val itemNameFilter = itemNameInput.text.toString().trim()
+                        .takeIf { it.isNotEmpty() } // null jeśli puste, wtedy brak filtru
+
+                    loadReservedItemsStats(startDate, endDate, { data ->
+                        updateBarChart(data)
+                    }, itemNameFilter)
                 }
+
             }
         }
 
@@ -204,6 +240,90 @@ class StatisticsFragment : Fragment() {
             })
         }
     }
+
+    private fun loadUserRegistrationStats(
+        startDate: LocalDate,
+        endDate: LocalDate,
+        callback: (Map<String, Map<String, Int>>) -> Unit
+    ) {
+        val db = FirebaseDatabase.getInstance().reference
+        val inputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
+        val outputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy") // do etykiety
+
+        val stats = mutableMapOf<String, MutableMap<String, Int>>()
+
+        db.child("UsersPersonalization").addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (userSnap in snapshot.children) {
+                    val registerTime = userSnap.child("registerTime").getValue(String::class.java) ?: continue
+                    try {
+                        val dateTime = LocalDateTime.parse(registerTime, inputFormatter)
+                        val regDate = dateTime.toLocalDate()
+                        if (!regDate.isBefore(startDate) && !regDate.isAfter(endDate)) {
+                            val dateKey = regDate.format(outputFormatter)
+                            stats.getOrPut(dateKey) { mutableMapOf() }.merge("Nowi użytkownicy", 1, Int::plus)
+                        }
+                    } catch (e: Exception) {
+                        // Ignoruj niepoprawne daty
+                    }
+                }
+                callback(stats)
+            }
+
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
+    private fun loadReservedItemsStats(
+        startDate: LocalDate,
+        endDate: LocalDate,
+        callback: (Map<String, Map<String, Int>>) -> Unit,
+        itemNameFilter: String? = null
+    ) {
+        val database = FirebaseDatabase.getInstance().reference.child("ReservedItems")
+        val inputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
+        val outputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+
+        database.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val statsMap = mutableMapOf<String, MutableMap<String, Int>>() // data -> (itemName -> count)
+
+                for (itemSnapshot in snapshot.children) {
+                    val itemName = itemSnapshot.child("itemName").getValue(String::class.java)
+                    val registerTime = itemSnapshot.child("registerTime").getValue(String::class.java)
+
+                    if (itemName == null || registerTime == null) continue
+
+                    // Filtrowanie po nazwie przedmiotu (jeśli podano)
+                    if (itemNameFilter != null && itemName != itemNameFilter) continue
+
+                    try {
+                        val dateTime = LocalDateTime.parse(registerTime, inputFormatter)
+                        val date = dateTime.toLocalDate()
+
+                        // Filtrowanie po zakresie dat
+                        if (date.isBefore(startDate) || date.isAfter(endDate)) continue
+
+                        val dateKey = date.format(outputFormatter)
+                        val dailyMap = statsMap.getOrPut(dateKey) { mutableMapOf() }
+                        dailyMap[itemName] = (dailyMap[itemName] ?: 0) + 1
+                    } catch (e: Exception) {
+                        // Ignoruj błędne daty
+                    }
+                }
+
+                callback(statsMap)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("ReservedItemsStats", "Database error: ${error.message}")
+            }
+        })
+    }
+
+
+
+
+
     private fun getLocalDateRange(start: LocalDate, end: LocalDate): List<LocalDate> {
         val dates = mutableListOf<LocalDate>()
         var current = start
@@ -214,29 +334,7 @@ class StatisticsFragment : Fragment() {
         return dates
     }
 
-    private fun fetchRoomForTraining(
-        dayOfWeek: String,
-        time: String,
-        classType: String,
-        groupLevel: String,
-        callback: (String?) -> Unit
-    ) {
-        val scheduleRef = FirebaseDatabase.getInstance().reference.child("schedule").child(dayOfWeek)
 
-        scheduleRef.get().addOnSuccessListener { daySnapshot ->
-            for (trainingIdSnapshot in daySnapshot.children) {
-                val trainingSnapshot = trainingIdSnapshot.child(time)
-                val gLevel = trainingSnapshot.child("groupLevel").getValue(String::class.java)
-                val cType = trainingSnapshot.child("classType").getValue(String::class.java)
-                if (gLevel == groupLevel && cType == classType) {
-                    val room = trainingSnapshot.child("room").getValue(String::class.java)
-                    callback(room)
-                    return@addOnSuccessListener
-                }
-            }
-            callback(null)
-        }
-    }
     private fun parseDateRange(input: String): List<Date> {
         val formatter = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
         return try {

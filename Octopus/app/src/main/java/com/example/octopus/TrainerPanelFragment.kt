@@ -74,6 +74,13 @@ class TrainerPanelFragment : Fragment() {
         scheduleRef = database.getReference("scheduleTrainers")
         buttonGoToTimer = view.findViewById(R.id.button_open_timer)
         personalHoursList.layoutManager = LinearLayoutManager(context)
+        hoursAdapter = HoursAdapter { hour ->
+            // Znajdź odpowiadający HourStatus dla klikniętej godziny
+            val matchedStatus = hoursAdapter.statuses?.find { it.time == hour }
+            matchedStatus?.let { handleHourClick(it) }
+        }
+        personalHoursList.adapter = hoursAdapter
+
         pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let {
                 uploadProfileImage(it)
@@ -179,7 +186,8 @@ class TrainerPanelFragment : Fragment() {
                 showEditDialog("Opis", descriptionText.text.toString()) { newDesc ->
                     trainer.description = newDesc
                     descriptionText.text = newDesc
-                    trainersRef.child("${trainer.email}").child("description").setValue(newDesc)
+                    val trainerEmail = trainer.email?.replace(".",",")
+                    trainersRef.child("${trainerEmail}").child("description").setValue(newDesc)
                 }
             } else {
                 Toast.makeText(context, "Dane trenera nie zostały jeszcze załadowane", Toast.LENGTH_SHORT).show()
@@ -271,21 +279,85 @@ class TrainerPanelFragment : Fragment() {
         datePickerDialog.show()
     }
     private fun loadAvailableHoursForDate(trainer: Trainer, date: String) {
-        val trainerKey = "${trainer.email}".replace(".",",")
+        val trainerKey = trainer.email?.replace(".", ",") ?: return
+        val schedulePath = "scheduleTrainers/$trainerKey/$date"
 
         scheduleRef.child(trainerKey).child(date).addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val hours = snapshot.children.mapNotNull { it.getValue(String::class.java) }
-                hoursAdapter = HoursAdapter(hours) { hour ->
-                    selectedHour = hour
-                }
-                personalHoursList.layoutManager = LinearLayoutManager(requireContext())
-                personalHoursList.adapter = hoursAdapter
+            override fun onDataChange(scheduleSnapshot: DataSnapshot) {
+                val hours = scheduleSnapshot.children.mapNotNull { it.getValue(String::class.java) }
+
+                val confirmedRef = database.getReference("ReservedTrainings/Confirmed")
+                val pendingRef = database.getReference("ReservedTrainings/Pending")
+
+                confirmedRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(confirmedSnapshot: DataSnapshot) {
+                        pendingRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(pendingSnapshot: DataSnapshot) {
+
+                                val hourStatuses = hours.map { hour ->
+                                    // Szukamy w "Confirmed"
+                                    val confirmed = confirmedSnapshot.children.firstOrNull {
+                                        it.child("trainerEmail").value == trainer.email &&
+                                                it.child("date").value == date &&
+                                                it.child("time").value == hour
+                                    }
+
+                                    // Szukamy w "Pending"
+                                    val pending = pendingSnapshot.children.firstOrNull {
+                                        it.child("trainerEmail").value == trainer.email &&
+                                                it.child("date").value == date &&
+                                                it.child("time").value == hour
+                                    }
+
+                                    when {
+                                        confirmed != null -> HourStatus(hour, HourStatus.Status.CONFIRMED, confirmed.key)
+                                        pending != null -> HourStatus(hour, HourStatus.Status.PENDING, pending.key)
+                                        else -> HourStatus(hour, HourStatus.Status.FREE)
+                                    }
+                                }
+
+                                hoursAdapter.updateData(hours, hourStatuses)
+
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {}
+                        })
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {}
+                })
             }
+
             override fun onCancelled(error: DatabaseError) {}
         })
     }
 
+    private fun handleHourClick(hourStatus: HourStatus) {
+        val basePath = when (hourStatus.status) {
+            HourStatus.Status.CONFIRMED -> "ReservedTrainings/Confirmed"
+            HourStatus.Status.PENDING -> "ReservedTrainings/Pending"
+            else -> return
+        }
+
+        val ref = database.getReference(basePath).child(hourStatus.reservationId ?: return)
+
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val firstName = snapshot.child("firstName").value as? String ?: "Brak"
+                val lastName = snapshot.child("lastName").value as? String ?: ""
+                val phone = snapshot.child("phoneNumber").value as? String ?: "Brak"
+                val email = snapshot.child("userEmail").value as? String ?: "Brak"
+
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Szczegóły rezerwacji")
+                    .setMessage("👤 $firstName $lastName\n📞 $phone\n✉️ $email")
+                    .setPositiveButton("OK", null)
+                    .show()
+            }
+
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
     @SuppressLint("DefaultLocale")
     private fun showAddHoursDialog(trainer: Trainer) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_add_hours, null)

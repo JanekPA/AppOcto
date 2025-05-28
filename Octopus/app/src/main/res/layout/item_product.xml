@@ -25,7 +25,7 @@
         android:id="@+id/textViewColor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Kolor" />
+        android:text="@string/Color" />
 
     <TextView
         android:id="@+id/textViewType"
@@ -37,12 +37,12 @@
         android:id="@+id/textViewSize"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Rozmiar" />
+        android:text="@string/Size" />
 
     <TextView
         android:id="@+id/textViewQuantity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ilość dostępna" />
+        android:text="@string/Quantity" />
 
 </LinearLayout>

@@ -29,19 +29,19 @@ class TrainersFragment : Fragment() {
     private lateinit var hoursRecyclerView: RecyclerView
     private lateinit var reserveButton: Button
     private lateinit var contactTextView: TextView
+    private lateinit var contactContainer: LinearLayout // lub inny widok zawierający dane kontaktowe
     private lateinit var pickDateButton: Button
     private lateinit var database: FirebaseDatabase
     private lateinit var classTypesRef: DatabaseReference
     private lateinit var groupLevelsRef: DatabaseReference
     private lateinit var trainersRef: DatabaseReference
     private lateinit var scheduleRef: DatabaseReference
-
+    private lateinit var hoursAdapter: HoursAdapter
     private var selectedTrainer: Trainer? = null
     private var selectedDate: String = LocalDate.now().format(DateTimeFormatter.ISO_DATE) // domyślnie dziś
     private var selectedHour: String? = null
 
     private lateinit var trainersAdapter: TrainersAdapter
-    private lateinit var hoursAdapter: HoursAdapter
 
 
     override fun onCreateView(
@@ -52,14 +52,20 @@ class TrainersFragment : Fragment() {
 
         val addTrainerButton: Button = view.findViewById(R.id.buttonAddTrainer)
         val editTrainerButton: Button = view.findViewById(R.id.editTrainerButton)
+        val addHoursButton: Button = view.findViewById(R.id.addHoursButton) // ← Dodany przycisk, jeśli masz go w layout
+
+        // Domyślnie ukrywamy przyciski administracyjne
+        addTrainerButton.visibility = View.GONE
         editTrainerButton.visibility = View.GONE
+        addHoursButton.visibility = View.GONE
 
         trainingTypeSpinner = view.findViewById(R.id.spinnerTrainingType)
         groupLevelSpinner = view.findViewById(R.id.spinnerGroupLevel)
         trainersRecyclerView = view.findViewById(R.id.recyclerViewTrainers)
         hoursRecyclerView = view.findViewById(R.id.recyclerViewAvailableHours)
         reserveButton = view.findViewById(R.id.buttonReserve)
-        contactTextView = view.findViewById(R.id.textViewContact)
+        contactTextView = view.findViewById(R.id.contactInfoMessage)
+        contactContainer = view.findViewById(R.id.contactContainer)
         pickDateButton = view.findViewById(R.id.buttonPickDate)
 
         database = FirebaseDatabase.getInstance()
@@ -80,12 +86,26 @@ class TrainersFragment : Fragment() {
             selectedTrainer?.let { showEditTrainerDialog(it) }
         }
 
+        // Sprawdzenie roli użytkownika
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            val uid = currentUser.uid
+            val userRef = FirebaseDatabase.getInstance().getReference("UsersPersonalization/$uid")
+
+            userRef.child("role").get().addOnSuccessListener { snapshot ->
+                val role = snapshot.getValue(String::class.java)
+                if (role == "admin") {
+                    addTrainerButton.visibility = View.VISIBLE
+                    editTrainerButton.visibility = View.VISIBLE
+                    addHoursButton.visibility = View.VISIBLE
+                }
+            }
+        }
+
         reserveButton.setOnClickListener {
-            val currentUser = FirebaseAuth.getInstance().currentUser
             val userUid = currentUser?.uid ?: return@setOnClickListener
             val database = FirebaseDatabase.getInstance().reference
 
-            // Sprawdź dane użytkownika
             database.child("UsersPersonalization").child(userUid)
                 .addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
@@ -99,12 +119,10 @@ class TrainersFragment : Fragment() {
                             return
                         }
 
-                        // Tutaj wybierasz np. datę/godzinę/trenera z UI
                         val selectedTrainerEmail = selectedTrainer?.email
                         val selectedDate = selectedDate
                         val selectedHour = selectedHour
 
-                        // Pobierz UID trenera na podstawie emaila
                         database.child("UsersPersonalization").orderByChild("email").equalTo(selectedTrainerEmail)
                             .addListenerForSingleValueEvent(object : ValueEventListener {
                                 override fun onDataChange(trainerSnap: DataSnapshot) {
@@ -113,6 +131,7 @@ class TrainersFragment : Fragment() {
                                         Toast.makeText(requireContext(), "Nie znaleziono trenera.", Toast.LENGTH_SHORT).show()
                                         return
                                     }
+
                                     val reservationId = database.child("ReservedTrainings").child("Pending").push().key ?: UUID.randomUUID().toString()
 
                                     val reservationData = mapOf(
@@ -132,7 +151,6 @@ class TrainersFragment : Fragment() {
                                     database.child("ReservedTrainings").child("Pending").child(reservationId)
                                         .setValue(reservationData)
 
-                                    // Dodaj powiadomienie dla trenera
                                     val timestamp = System.currentTimeMillis()
                                     val notifId = database.child("Notifications").child(trainerUid).push().key ?: UUID.randomUUID().toString()
 
@@ -157,13 +175,18 @@ class TrainersFragment : Fragment() {
                 })
         }
 
-
         pickDateButton.setOnClickListener {
             showDatePickerDialog()
         }
-
+        hoursAdapter = HoursAdapter { selected ->
+            selectedHour = selected
+            reserveButton.isEnabled = true
+        }
+        hoursRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        hoursRecyclerView.adapter = hoursAdapter
         return view
     }
+
 
     private fun showAddTrainerDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_add_trainer, null)
@@ -324,10 +347,8 @@ class TrainersFragment : Fragment() {
                                 LocalTime.MIDNIGHT
                             }
                         }
-                        hoursAdapter = HoursAdapter(sortedHours) { hour ->
-                            selectedHour = hour
-                            reserveButton.isEnabled = true
-                        }
+                        hoursAdapter.updateData(sortedHours)
+                        reserveButton.isEnabled = sortedHours.isNotEmpty()
                         hoursRecyclerView.layoutManager = LinearLayoutManager(requireContext())
                         hoursRecyclerView.adapter = hoursAdapter
                     }
@@ -365,7 +386,8 @@ class TrainersFragment : Fragment() {
         // Resetuj wcześniej wybranego trenera i godziny
         selectedTrainer = null
         selectedHour = null
-        contactTextView.text = "Wybierz trenera, aby uzyskać kontakt!"
+        contactTextView.visibility = View.VISIBLE
+        contactContainer.visibility = View.GONE
         hoursRecyclerView.adapter = null
         reserveButton.isEnabled = false
 
@@ -460,8 +482,15 @@ class TrainersFragment : Fragment() {
                                                         if (!stillExists) {
                                                             selectedTrainer = null
                                                             selectedHour = null
-                                                            contactTextView.text = "Wybierz trenera, aby uzyskać kontakt!"
-                                                            hoursAdapter = HoursAdapter(emptyList()) { }
+                                                            contactTextView.visibility = View.VISIBLE
+                                                            contactContainer.visibility = View.GONE
+
+                                                            hoursAdapter = HoursAdapter { selected ->
+                                                                selectedHour = selected
+                                                                reserveButton.isEnabled = true
+                                                            }
+                                                            hoursAdapter.updateData(emptyList())
+
                                                             hoursRecyclerView.adapter = hoursAdapter
                                                             reserveButton.isEnabled = false
                                                         }
@@ -613,31 +642,85 @@ class TrainersFragment : Fragment() {
 
 
 
+
     @SuppressLint("SetTextI18n")
     private fun setupTrainerRecycler(trainers: List<Trainer>) {
         val addHoursButton = requireView().findViewById<Button>(R.id.addHoursButton)
         val editTrainerButton = requireView().findViewById<Button>(R.id.editTrainerButton)
-        trainersAdapter = TrainersAdapter(trainers) { trainer: Trainer ->
-            selectedTrainer = trainer
-            contactTextView.text = "Kontakt:\n${trainer.phoneNumber}\n${trainer.email}\n${trainer.facebook}\n${trainer.instagram}"
-            updateAvailableHours()
 
-            addHoursButton.apply {
-                visibility = View.VISIBLE
-                setOnClickListener { showAddHoursDialog(trainer) }
+        // Domyślnie ukryj przyciski
+        addHoursButton.visibility = View.GONE
+        editTrainerButton.visibility = View.GONE
+
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            val uid = currentUser.uid
+            val userRef = FirebaseDatabase.getInstance().getReference("UsersPersonalization/$uid")
+
+            userRef.child("role").get().addOnSuccessListener { snapshot ->
+                val isAdmin = snapshot.getValue(String::class.java) == "admin"
+
+                trainersAdapter = TrainersAdapter(trainers) { trainer: Trainer ->
+                    selectedTrainer = trainer
+// Ukryj tekst kontaktowy, pokaż pełny kontener z ikonami itp.
+                    contactTextView.visibility = View.GONE
+                    contactContainer.visibility = View.VISIBLE
+
+                    requireView().findViewById<TextView>(R.id.contactPhone).text = trainer.phoneNumber
+                    requireView().findViewById<TextView>(R.id.contactEmail).text = trainer.email
+                    requireView().findViewById<TextView>(R.id.contactFb).text = trainer.facebook
+                    requireView().findViewById<TextView>(R.id.contactInsta).text = trainer.instagram
+
+                    updateAvailableHours()
+
+                    if (isAdmin) {
+                        addHoursButton.apply {
+                            visibility = View.VISIBLE
+                            setOnClickListener { showAddHoursDialog(trainer) }
+                        }
+
+                        editTrainerButton.apply {
+                            visibility = View.VISIBLE
+                            setOnClickListener { showEditTrainerDialog(trainer) }
+                        }
+                    } else {
+                        addHoursButton.visibility = View.GONE
+                        editTrainerButton.visibility = View.GONE
+                    }
+                }
+
+                trainersRecyclerView.apply {
+                    layoutManager = LinearLayoutManager(requireContext())
+                    adapter = trainersAdapter
+                }
+            }
+        } else {
+            // Użytkownik niezalogowany – ustaw adapter bez przycisków
+            trainersAdapter = TrainersAdapter(trainers) { trainer: Trainer ->
+                selectedTrainer = trainer
+// Ukryj tekst kontaktowy, pokaż pełny kontener z ikonami itp.
+                contactTextView.visibility = View.GONE
+                contactContainer.visibility = View.VISIBLE
+
+                requireView().findViewById<TextView>(R.id.contactPhone).text = trainer.phoneNumber
+                requireView().findViewById<TextView>(R.id.contactEmail).text = trainer.email
+                requireView().findViewById<TextView>(R.id.contactFb).text = trainer.facebook
+                requireView().findViewById<TextView>(R.id.contactInsta).text = trainer.instagram
+
+                updateAvailableHours()
+
+                // Przyciski pozostają niewidoczne
+                addHoursButton.visibility = View.GONE
+                editTrainerButton.visibility = View.GONE
             }
 
-            editTrainerButton.apply {
-                visibility = View.VISIBLE
-                setOnClickListener { showEditTrainerDialog(trainer) }
+            trainersRecyclerView.apply {
+                layoutManager = LinearLayoutManager(requireContext())
+                adapter = trainersAdapter
             }
-        }
-
-        trainersRecyclerView.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = trainersAdapter
         }
     }
+
 
     @SuppressLint("DefaultLocale")
     private fun showAddHoursDialog(trainer: Trainer) {
@@ -695,17 +778,21 @@ class TrainersFragment : Fragment() {
     private fun updateAvailableHours() {
         val hours = selectedTrainer?.availability?.get(selectedDate) ?: emptyList()
 
-        hoursAdapter = HoursAdapter(hours) { selected ->
+        hoursAdapter = HoursAdapter { selected ->
             selectedHour = selected
             reserveButton.isEnabled = true
         }
+        hoursAdapter.updateData(hours)
+
 
         hoursRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         hoursRecyclerView.adapter = hoursAdapter
 
         if (selectedTrainer == null) {
-            contactTextView.text = "Wybierz trenera, aby uzyskać kontakt!"
+            contactTextView.visibility = View.VISIBLE
+            contactContainer.visibility = View.GONE
         }
+
 
         if (hours.isEmpty()) {
             reserveButton.isEnabled = false

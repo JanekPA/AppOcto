@@ -590,11 +590,13 @@ class MainActivity : AppCompatActivity() {
                         else if (role == "admin")
                         {
                             forAdminItem.isVisible = true
+                            forTrainersItem.isVisible = false
                         }
                     }
                     else{
                         headerText.text = "Witaj, $username!"
                         userProfileItem.isVisible = true
+                        forTrainersItem.isVisible = false
                     }
                 }
                 .addOnFailureListener {
@@ -610,6 +612,7 @@ class MainActivity : AppCompatActivity() {
             loginItem.isVisible = true
             logoutItem.isVisible = false
             userProfileItem.isVisible = false
+            forAdminItem.isVisible = false
         }
     }
     private fun showGeneralDialog(notification: NotificationItem) {

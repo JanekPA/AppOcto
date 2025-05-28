@@ -11,6 +11,8 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager.widget.ViewPager
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -29,6 +31,8 @@ class ScheduleFragment : Fragment() {
 
     private var classTypes: List<String> = emptyList()
     private var groupLevels: List<String> = emptyList()
+    private lateinit var dayViewPager: ViewPager2
+    private lateinit var daysOfWeek: List<String>
 
     private fun openEditDescriptionFragment(item: ScheduleItem) {
         val classType = item.classType
@@ -116,19 +120,32 @@ class ScheduleFragment : Fragment() {
 
         val addButton: FloatingActionButton = view.findViewById(R.id.add_schedule_button)
         addButton.setOnClickListener { showAddDialog() }
+        daysOfWeek = resources.getStringArray(R.array.days_of_week).toList()
+        dayViewPager = view.findViewById(R.id.day_view_pager)
 
-        val daySpinner: Spinner = view.findViewById(R.id.day_spinner)
-        val dayAdapter = ArrayAdapter.createFromResource(
-            requireContext(), R.array.days_of_week, android.R.layout.simple_spinner_dropdown_item
-        )
-        daySpinner.adapter = dayAdapter
-        daySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selectedDay = parent?.getItemAtPosition(position).toString()
+        val dayAdapter = DayPagerAdapter(daysOfWeek) { day ->
+            // callback np. przy kliknięciu w dzień w adapterze (jeśli jest potrzebny)
+            selectedDay = day
+            updateScheduleList()
+        }
+
+        dayViewPager.adapter = dayAdapter
+
+// Ustawienie początkowego dnia tygodnia na aktualny
+        val calendar = Calendar.getInstance()
+        val todayIndex = (calendar.get(Calendar.DAY_OF_WEEK) + 5) % 7 // Poniedziałek = 0
+        dayViewPager.setCurrentItem(todayIndex, false)
+        selectedDay = daysOfWeek[todayIndex]
+        updateScheduleList()  // od razu ładujemy zajęcia dla początkowego dnia
+
+// Dodajemy listener dla ViewPager2
+        dayViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                selectedDay = daysOfWeek[position]
                 updateScheduleList()
             }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
+        })
 
         loadClassTypesAndGroupLevels()
 
@@ -228,6 +245,9 @@ class ScheduleFragment : Fragment() {
                 .addOnFailureListener {
                     Toast.makeText(requireContext(), "Błąd scheduleFragment!", Toast.LENGTH_SHORT).show()
                 }
+        }
+        else{
+            openEditDescriptionFragment(item)
         }
 
 

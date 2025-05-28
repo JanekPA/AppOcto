@@ -77,6 +77,10 @@
         android:id="@+id/action_adminPanel_to_statisticsFragment"
         app:destination="@id/statisticsFragment"
         />
+        <action
+            android:id="@+id/action_adminPanel_to_manageRolesFragment"
+            app:destination="@id/manageRolesFragment"
+        />
     </fragment>
     <fragment
         android:id="@+id/pricingFragment"
@@ -126,6 +130,12 @@
         android:id="@+id/statisticsFragment"
         android:name="com.example.octopus.StatisticsFragment"
         android:label="Panel Statystyk">
+
+    </fragment>
+    <fragment
+        android:id="@+id/manageRolesFragment"
+        android:name="com.example.octopus.ManageRolesFragment"
+        android:label="Zarządzaj rolami">
 
     </fragment>
 </navigation>

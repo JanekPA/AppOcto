@@ -13,57 +13,75 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center_horizontal"
-        android:padding="8dp"
-        >
+        android:padding="8dp">
 
-        <!-- Płaszczyzna treningu -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Płaszczyzna treningu"
-            android:textStyle="bold"
-            android:layout_marginBottom="4dp" />
-
-        <Spinner
-            android:id="@+id/spinnerTrainingType"
+        <!-- Płaszczyzna treningu i poziom jako rząd Chipów -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp" />
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp"
+            android:weightSum="2">
 
-        <!-- Poziom zaawansowania -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/Training_type"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="4dp" />
+
+                <Spinner
+                    android:id="@+id/spinnerTrainingType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/Group_level"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="4dp" />
+
+                <Spinner
+                    android:id="@+id/spinnerGroupLevel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+        <!-- Trenerzy -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Poziom zaawansowania"
-            android:textStyle="bold"
-            android:layout_marginBottom="4dp" />
-
-        <Spinner
-            android:id="@+id/spinnerGroupLevel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp" />
-
-        <!-- Lista trenerów -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Lista trenerów"
+            android:text="@string/List_trainers"
             android:textStyle="bold"
             android:layout_marginBottom="4dp" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewTrainers"
             android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:layout_marginBottom="16dp"
+            android:layout_height="100dp"
+            android:layout_marginBottom="12dp"
             android:scrollbars="vertical" />
 
-        <!-- Wybór dnia tygodnia -->
+        <!-- Wybór daty -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Data treningu"
+            android:text="@string/Date_trainers"
             android:textStyle="bold"
             android:layout_marginBottom="4dp" />
 
@@ -71,69 +89,185 @@
             android:id="@+id/buttonPickDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Wybierz datę"
+            android:text="@string/Pick_date"
             android:layout_marginBottom="12dp" />
 
-        <!-- Lista dostępnych godzin -->
+
+        <!-- Godziny -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Dostępne godziny"
+            android:text="@string/Available_hours"
             android:textStyle="bold"
             android:layout_marginBottom="4dp" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewAvailableHours"
             android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:layout_marginBottom="16dp" />
+            android:layout_height="100dp"
+            android:layout_marginBottom="12dp" />
 
-        <!-- Przycisk rezerwacji -->
+        <!-- Rezerwacja -->
         <Button
             android:id="@+id/buttonReserve"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:enabled="false"
-            android:text="Zarezerwuj trening"
+            android:text="@string/Reserve_training"
             android:textColor="@android:color/white"
             android:backgroundTint="@android:color/holo_green_dark"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Okienko kontaktu -->
+            android:layout_marginBottom="12dp" />
+        <!-- Kontakt info -->
         <TextView
-            android:id="@+id/textViewContact"
+            android:id="@+id/contactInfoMessage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/darker_gray"
-            android:padding="16dp"
             android:text="Wybierz trenera, aby uzyskać kontakt!"
             android:textAlignment="center"
             android:textColor="@android:color/white"
             android:textSize="16sp"
-            android:layout_marginBottom="16dp"
+            android:padding="16dp"
+            android:layout_marginBottom="8dp"
             android:backgroundTint="@android:color/darker_gray"
-            android:gravity="center" />
+            android:gravity="center"
+            android:background="@drawable/contact_card_background"
+            android:visibility="visible" />
+
+        <LinearLayout
+            android:id="@+id/contactContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/contact_card_background"
+            android:backgroundTint="@android:color/darker_gray"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/Contact"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#FF4500"
+                android:shadowColor="#000000"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="8"
+                android:layout_gravity="center"/>
+            <!-- Telefon -->
+            <LinearLayout
+                android:id="@+id/contactPhoneRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingVertical="4dp">
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_baseline_call_24"
+                    android:contentDescription="Telefon"
+                    />
+                <TextView
+                    android:id="@+id/contactPhone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:layout_marginStart="8dp"/>
+            </LinearLayout>
+
+            <!-- Email -->
+            <LinearLayout
+                android:id="@+id/contactEmailRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingVertical="4dp">
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/gmail_icon"
+                    android:contentDescription="Email"
+                    />
+                <TextView
+                    android:id="@+id/contactEmail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:layout_marginStart="8dp"/>
+            </LinearLayout>
+
+            <!-- Facebook -->
+            <LinearLayout
+                android:id="@+id/contactFbRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingVertical="4dp">
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/fb_icon"
+                    android:contentDescription="Facebook"
+                    />
+                <TextView
+                    android:id="@+id/contactFb"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:layout_marginStart="8dp"/>
+            </LinearLayout>
+
+            <!-- Instagram -->
+            <LinearLayout
+                android:id="@+id/contactInstaRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingVertical="4dp">
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/instagram_icon"
+                    android:contentDescription="Instagram"
+                    />
+                <TextView
+                    android:id="@+id/contactInsta"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:layout_marginStart="8dp"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Przyciski admina -->
         <Button
             android:id="@+id/buttonAddTrainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Dodaj trenera"
+            android:layout_marginBottom="8dp" />
 
-            android:layout_marginBottom="24dp" />
         <Button
             android:id="@+id/addHoursButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Dodaj godziny"
             android:visibility="gone"
-            android:layout_margin="8dp" />
+            android:layout_marginBottom="8dp" />
+
         <Button
             android:id="@+id/editTrainerButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Edytuj trenera"
             android:visibility="gone"
-            android:layout_margin="8dp" />
+            android:layout_marginBottom="16dp" />
     </LinearLayout>
 
 </ScrollView>

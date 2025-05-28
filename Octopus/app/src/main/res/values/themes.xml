@@ -1,9 +1,13 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.Octopus" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
-    </style>
+    <style name="Theme.Octopus" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#D32F2F</item>
+        <item name="colorSecondary">#FF6F00</item>
+        <item name="colorError">#003366</item>
 
-    <style name="Theme.Octopus" parent="Base.Theme.Octopus" />
+        <item name="colorSurface">#FFFFFF</item>
+
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorOnBackground">#000000</item>
+        <item name="colorOnSurface">#000000</item>
+    </style>
 </resources>

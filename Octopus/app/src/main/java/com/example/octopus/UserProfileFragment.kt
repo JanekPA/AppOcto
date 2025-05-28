@@ -79,30 +79,25 @@ class UserProfileFragment : Fragment() {
 
     private fun loadUserData() {
         val currentUser = FirebaseAuth.getInstance().currentUser ?: return
-        val email = currentUser.email ?: return
-        val ref = database.child("UsersPersonalization")
+        val userId = currentUser.uid
+        val ref = database.child("UsersPersonalization").child(userId)
 
         ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                for (child in snapshot.children) {
-                    val userEmail = child.child("email").getValue(String::class.java)
-                    if (userEmail == email) {
+                if (snapshot.exists()) {
+                    editImie.setText(snapshot.child("name").getValue(String::class.java) ?: "")
+                    editNazwisko.setText(snapshot.child("surname").getValue(String::class.java) ?: "")
+                    editUsername.setText(snapshot.child("username").getValue(String::class.java) ?: "")
+                    editPhone.setText(snapshot.child("phoneNumber").getValue(String::class.java) ?: "")
+                    textEmail.text = currentUser.email ?: ""
 
-                        editImie.setText(child.child("name").getValue(String::class.java) ?: "")
-                        editUsername.setText(child.child("username").getValue(String::class.java) ?: "")
-                        editNazwisko.setText(child.child("surname").getValue(String::class.java) ?: "")
-                        editPhone.setText(child.child("phoneNumber").getValue(String::class.java) ?: "")
-                        textEmail.text = userEmail
+                    imieWarning.visibility = if (editImie.text.isEmpty()) View.VISIBLE else View.GONE
+                    nazwiskoWarning.visibility = if (editNazwisko.text.isEmpty()) View.VISIBLE else View.GONE
+                    usernameWarning.visibility = if (editUsername.text.isEmpty()) View.VISIBLE else View.GONE
 
-                        imieWarning.visibility = if (editImie.text.isEmpty()) View.VISIBLE else View.GONE
-                        nazwiskoWarning.visibility = if (editNazwisko.text.isEmpty()) View.VISIBLE else View.GONE
-                        usernameWarning.visibility = if (editUsername.text.isEmpty()) View.VISIBLE else View.GONE
-
-                        val imageUrl = child.child("profileImageUrl").getValue(String::class.java)
-                        if (!imageUrl.isNullOrEmpty()) {
-                            Glide.with(this@UserProfileFragment).load(imageUrl).into(profileImage)
-                        }
-                        break // znaleziono, wychodzimy
+                    val imageUrl = snapshot.child("profileImageUrl").getValue(String::class.java)
+                    if (!imageUrl.isNullOrEmpty()) {
+                        Glide.with(this@UserProfileFragment).load(imageUrl).into(profileImage)
                     }
                 }
             }
@@ -110,52 +105,57 @@ class UserProfileFragment : Fragment() {
             override fun onCancelled(error: DatabaseError) {}
         })
     }
+
 
 
     private fun saveUserData() {
         val currentUser = FirebaseAuth.getInstance().currentUser ?: return
-        val email = currentUser.email ?: return
-        val ref = database.child("UsersPersonalization")
+        val userId = currentUser.uid
+        val ref = database.child("UsersPersonalization").child(userId)
 
-        ref.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                for (child in snapshot.children) {
-                    val userEmail = child.child("email").getValue(String::class.java)
-                    if (userEmail == email) {
-                        val userId = child.key ?: continue
-                        val daneRef = ref.child(userId)
-                        daneRef.updateChildren(mapOf(
-                            "name" to editImie.text.toString(),
-                            "surname" to editNazwisko.text.toString(),
-                            "username" to editUsername.text.toString(),
-                            "phoneNumber" to editPhone.text.toString()
-                        ))
+        val updatedData = mapOf(
+            "name" to editImie.text.toString(),
+            "surname" to editNazwisko.text.toString(),
+            "username" to editUsername.text.toString(),
+            "phoneNumber" to editPhone.text.toString(),
+            "email" to (currentUser.email ?: "") // dla pewności aktualizuj email
+        )
 
-                        imageUri?.let {
-                            val storageRef = storage.reference.child("profile_images/$userId.jpg")
-                            storageRef.putFile(it).addOnSuccessListener {
-                                storageRef.downloadUrl.addOnSuccessListener { uri ->
-                                    ref.child(userId).child("profileImageUrl").setValue(uri.toString())
+        ref.updateChildren(updatedData)
+            .addOnSuccessListener {
+                if (imageUri != null) {
+                    val storageRef = storage.reference.child("profile_images/$userId.jpg")
+                    storageRef.putFile(imageUri!!).addOnSuccessListener {
+                        storageRef.downloadUrl.addOnSuccessListener { uri ->
+                            ref.child("profileImageUrl").setValue(uri.toString())
+                                .addOnSuccessListener {
+                                    Toast.makeText(requireContext(), "Zapisano dane i zdjęcie", Toast.LENGTH_SHORT).show()
                                 }
-                            }
+                                .addOnFailureListener {
+                                    Toast.makeText(requireContext(), "Dane zapisane, ale nie udało się zapisać zdjęcia", Toast.LENGTH_SHORT).show()
+                                }
                         }
-
-                        break
+                    }.addOnFailureListener {
+                        Toast.makeText(requireContext(), "Błąd zapisu zdjęcia", Toast.LENGTH_SHORT).show()
                     }
+                } else {
+                    Toast.makeText(requireContext(), "Dane zapisane", Toast.LENGTH_SHORT).show()
                 }
             }
-
-            override fun onCancelled(error: DatabaseError) {}
-        })
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "Błąd zapisu danych", Toast.LENGTH_SHORT).show()
+            }
     }
+
+
 
 
     private fun loadUserReservations() {
         val currentUser = FirebaseAuth.getInstance().currentUser
         val currentEmail = currentUser?.email ?: return
 
-        database = FirebaseDatabase.getInstance().reference.child("ReservedItems")
-        database.addValueEventListener(object : ValueEventListener {
+        val refdatabase = database.child("ReservedItems")
+        refdatabase.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 reservations.clear()
                 for (firstLevel in snapshot.children) {

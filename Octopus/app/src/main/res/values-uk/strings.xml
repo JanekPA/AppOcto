@@ -3,20 +3,27 @@
     <string name="navigation_drawer_open">Відкрити меню</string>
     <string name="navigation_drawer_close">Закрити меню</string>
     <string name="settings">Налаштування</string>
-    <string name="push_notify">Push-повідомлення</string>
-    <string name="theme">тема</string>
-    <string name="language">язик</string>
-    <string name="schedule">розклад</string>
-    <string name="homepage">Домашня сторінка</string>
+    <string name="push_notify">Push-сповіщення</string>
+    <string name="theme">Тема</string>
+    <string name="language">Мова</string>
+    <string name="schedule">Розклад</string>
+    <string name="homepage">Головна сторінка</string>
+    <string-array name="themes_array">
+        <item>За замовчуванням</item>
+        <item>Світла</item>
+        <item>Темна</item>
+    </string-array>
+    <string-array name="statistics_types">
+        <item>Учасники</item>
+        <item>Користувачі</item>
+        <item>Бронювання</item>
+    </string-array>
     <string-array name="rooms_array">
         <item>Мала зала</item>
         <item>Велика зала</item>
     </string-array>
-    <string-array name="themes_array">
-        <item>За замовчуванням</item>
-        <item>світла</item>
-        <item>темна </item>
-    </string-array>
+    <string name="Small_room">Мала зала</string>
+    <string name="Large_room">Велика зала</string>
     <string-array name="days_of_week">
         <item>Понеділок</item>
         <item>Вівторок</item>
@@ -26,7 +33,6 @@
         <item>Субота</item>
         <item>Неділя</item>
     </string-array>
-
     <string-array name="class_types_array">
         <item>MMA</item>
         <item>Бокс</item>
@@ -34,33 +40,29 @@
         <item>Боротьба</item>
         <item>No-Gi</item>
         <item>BJJ</item>
-        <item>Вільний мат</item>
+        <item>Вільна зона</item>
     </string-array>
-
     <string-array name="group_levels_array">
-        <item>початковий</item>
+        <item>початкова</item>
         <item>діти (6 - 12 років)</item>
         <item>юніори (12 - 16 років)</item>
-        <item>сімейна</item>
+        <item>родинна</item>
         <item>середній рівень</item>
-        <item>просунутий</item>
-        <item>професіонали</item>
+        <item>просунута</item>
+        <item>профі</item>
         <item>змішана</item>
         <item>спаринги</item>
     </string-array>
-
     <string-array name="item_types">
         <item>Обладнання</item>
         <item>Одяг</item>
         <item>Аксесуари</item>
     </string-array>
-
     <string-array name="item_type_options">
         <item>Дитячий</item>
-        <item>Дорослий - Жіночий</item>
-        <item>Дорослий - Чоловічий</item>
+        <item>Дорослий - жіночий</item>
+        <item>Дорослий - чоловічий</item>
     </string-array>
-
     <string-array name="item_size_options">
         <item>XS</item>
         <item>S</item>
@@ -69,13 +71,46 @@
         <item>XL</item>
         <item>XXL</item>
     </string-array>
-
     <string-array name="payment_methods">
         <item>Готівка</item>
     </string-array>
-<string name="polish">Polski</string>
-<string name="english">English</string>
-<string name="ukrainian">Українська</string>
-    <item name="nav_logout" type="id" />
-    <string name="payment_prompt">Спосіб оплати</string>
+    <string name="Login">Вхід</string>
+    <string name="Login2">Увійти!</string>
+    <string name="Logintoregister">Немає облікового запису? Зареєструйтеся тут</string>
+    <string name="Name">Імʼя</string>
+    <string name="Sign_up">Реєстрація</string>
+    <string name="Sign_up2">Зареєструватися!</string>
+    <string name="Username">Імʼя користувача</string>
+    <string name="Registertologin">Вже зареєстровані? Увійдіть!</string>
+    <string name="email">Електронна пошта</string>
+    <string name="password">Пароль</string>
+    <string name="Hello_user">Привіт, гість!</string>
+    <string name="Hello_user_main">Ласкаво просимо до додатку Octopus!</string>
+    <string name="Close_schedule">Найближчі заняття</string>
+    <string name="reservation">Бронювання</string>
+    <string name="trainers">Наші тренери</string>
+    <string name="Prices">Ціни</string>
+    <string name="Check_availability">Перевірити доступність</string>
+    <string name="My_reservations">Мої бронювання</string>
+    <string name="Price">Ціна</string>
+    <string name="Color">Колір</string>
+    <string name="Size">Розмір</string>
+    <string name="Quantity">Кількість</string>
+    <string name="Training_type">Тип тренування</string>
+    <string name="Group_level">Рівень групи</string>
+    <string name="Groups">Заняття</string>
+    <string name="List_trainers">Список тренерів</string>
+    <string name="Date_trainers">Дата тренування</string>
+    <string name="Pick_date">Оберіть дату</string>
+    <string name="Available_hours">Доступні години</string>
+    <string name="Reserve_training">Забронювати тренування</string>
+    <string name="Contact">Контакт</string>
+    <string name="Your_notifications">Ваші сповіщення</string>
+    <string name="You_have_questions">Є питання? Звʼяжіться з нами!</string>
+    <string name="Contact_number">Контактний номер</string>
+    <string name="polish">Польська</string>
+    <string name="english">Англійська</string>
+    <string name="ukrainian">Українська</string>
+    <item name="nav_logout" type="id"/>
+    <string name="payment_prompt">Метод оплати</string>
 </resources>

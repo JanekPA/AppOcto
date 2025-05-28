@@ -170,14 +170,15 @@ class CheckAvailabilityFragment : Fragment() {
         val firstNameEditText = dialogView.findViewById<EditText>(R.id.firstNameEditText)
         val lastNameEditText = dialogView.findViewById<EditText>(R.id.lastNameEditText)
         val phoneEditText = dialogView.findViewById<EditText>(R.id.phoneEditText)
+        val quantityEditText = dialogView.findViewById<EditText>(R.id.quantityEditText)
         val paymentSpinner = dialogView.findViewById<Spinner>(R.id.paymentSpinner)
-        val quantityEditText = dialogView.findViewById<EditText>(R.id.quantityEditText)  // dodaj to pole w XML
+        val pickupDateEditText = dialogView.findViewById<EditText>(R.id.pickupDateEditText)
 
         val paymentOptions = listOf("Gotówka")
         val paymentAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, paymentOptions)
         paymentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         paymentSpinner.adapter = paymentAdapter
-        val pickupDateEditText = dialogView.findViewById<EditText>(R.id.pickupDateEditText)
+
         pickupDateEditText.setOnClickListener {
             val calendar = Calendar.getInstance()
             val datePicker = DatePickerDialog(
@@ -192,42 +193,80 @@ class CheckAvailabilityFragment : Fragment() {
             )
             datePicker.show()
         }
-        AlertDialog.Builder(requireContext())
+
+        val dialogBuilder = AlertDialog.Builder(requireContext())
             .setTitle("Zarezerwuj: ${item.name}")
             .setView(dialogView)
-            .setPositiveButton("Zarezerwuj") { dialog, _ ->
-                val firstName = firstNameEditText.text.toString()
-                val lastName = lastNameEditText.text.toString()
-                val phone = phoneEditText.text.toString()
-                val payment = paymentSpinner.selectedItem?.toString() ?: "Nie wybrano"
-                val quantity = quantityEditText.text.toString().toIntOrNull() ?: 1
-                val currentTime = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault()).format(Date())
+            .setNegativeButton("Anuluj", null)
+            .setPositiveButton("Zarezerwuj", null) // Nadpiszemy obsługę kliknięcia później
 
-                if (quantity > item.quantity) {
-                    Toast.makeText(requireContext(), "Nie ma tylu sztuk dostępnych", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
+        val alertDialog = dialogBuilder.create()
+        alertDialog.setOnShowListener {
+            val reserveButton = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            reserveButton.setOnClickListener {
+                val firstName = firstNameEditText.text.toString().trim()
+                val lastName = lastNameEditText.text.toString().trim()
+                val phone = phoneEditText.text.toString().trim()
+                val pickupDateText = pickupDateEditText.text.toString().trim()
+                val quantity = quantityEditText.text.toString().toIntOrNull()
+                val payment = paymentSpinner.selectedItem?.toString() ?: "Nie wybrano"
+
+                if (firstName.isEmpty() || lastName.isEmpty() || phone.isEmpty() || pickupDateText.isEmpty() || quantity == null) {
+                    Toast.makeText(requireContext(), "Uzupełnij wszystkie pola!", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
                 }
 
+                if (!phone.matches(Regex("\\d{9}"))) {
+                    Toast.makeText(requireContext(), "Numer telefonu musi zawierać dokładnie 9 cyfr!", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+                val today = Calendar.getInstance()
+                val pickupCalendar = Calendar.getInstance()
+
+                try {
+                    pickupCalendar.time = dateFormat.parse(pickupDateText)!!
+                } catch (e: Exception) {
+                    Toast.makeText(requireContext(), "Nieprawidłowy format daty!", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                if (pickupCalendar.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                    Toast.makeText(requireContext(), "Nie można zarezerwować na niedzielę!", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                today.add(Calendar.DAY_OF_YEAR, 1)
+                if (pickupCalendar.before(today)) {
+                    Toast.makeText(requireContext(), "Rezerwacja możliwa najwcześniej od jutra!", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                if (quantity > item.quantity) {
+                    Toast.makeText(requireContext(), "Nie ma tylu sztuk dostępnych!", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                val currentTime = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault()).format(Date())
                 val reservation = mapOf(
                     "itemName" to item.name,
                     "userId" to user.uid,
-                    "userEmail" to user.email,  // <-- dodaj to
+                    "userEmail" to user.email,
                     "firstName" to firstName,
                     "lastName" to lastName,
                     "phone" to phone,
                     "payment" to payment,
                     "quantity" to quantity,
-                    "pickupDate" to pickupDateEditText.text.toString(),
+                    "pickupDate" to pickupDateText,
                     "registerTime" to currentTime,
                     "price" to item.price,
                     "status" to "W trakcie realizacji"
                 )
 
-
                 val reservationId = database.child("ReservedItems").push().key ?: UUID.randomUUID().toString()
                 database.child("ReservedItems").child(reservationId).setValue(reservation)
 
-                // Aktualizacja ilości w magazynie
                 val newQuantity = item.quantity - quantity
                 if (newQuantity == 0) {
                     database.child("Storage").child(currentType).child(item.id).removeValue()
@@ -236,47 +275,50 @@ class CheckAvailabilityFragment : Fragment() {
                     .addOnCompleteListener {
                         Toast.makeText(requireContext(), "Zarezerwowano!", Toast.LENGTH_SHORT).show()
                         loadItems()
-                        dialog.dismiss()
+                        alertDialog.dismiss()
                     }
-                database.child("UsersPersonalization").orderByKey().equalTo(user.uid).addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        for (userSnap in snapshot.children) {
-                            val role = userSnap.child("role").getValue(String::class.java)
-                            if (role == "user" || role == "trainer") {
-                                // Powiadom wszystkich adminów
-                                database.child("UsersPersonalization").addListenerForSingleValueEvent(object : ValueEventListener {
-                                    override fun onDataChange(adminSnapshot: DataSnapshot) {
-                                        for (adminSnap in adminSnapshot.children) {
-                                            val adminRole = adminSnap.child("role").getValue(String::class.java)
-                                            if (adminRole == "admin") {
-                                                val adminUid = adminSnap.key ?: continue
-                                                val notifId = database.child("Notifications").child(adminUid).push().key ?: UUID.randomUUID().toString()
 
-                                                val notification = mapOf(
-                                                    "title" to "Nowa rezerwacja",
-                                                    "message" to "Użytkownik ${user.email} ($firstName $lastName) złożył zamówienie.",
-                                                    "reservationId" to reservationId,
-                                                    "timestamp" to System.currentTimeMillis(),
-                                                    "type" to "item_reservation"
-                                                )
+                database.child("UsersPersonalization").orderByKey().equalTo(user.uid)
+                    .addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            for (userSnap in snapshot.children) {
+                                val role = userSnap.child("role").getValue(String::class.java)
+                                if (role == "user" || role == "trainer") {
+                                    database.child("UsersPersonalization").addListenerForSingleValueEvent(object : ValueEventListener {
+                                        override fun onDataChange(adminSnapshot: DataSnapshot) {
+                                            for (adminSnap in adminSnapshot.children) {
+                                                val adminRole = adminSnap.child("role").getValue(String::class.java)
+                                                if (adminRole == "admin") {
+                                                    val adminUid = adminSnap.key ?: continue
+                                                    val notifId = database.child("Notifications").child(adminUid).push().key ?: UUID.randomUUID().toString()
 
-                                                database.child("Notifications").child(adminUid).child(notifId).setValue(notification)
+                                                    val notification = mapOf(
+                                                        "title" to "Nowa rezerwacja",
+                                                        "message" to "Użytkownik ${user.email} ($firstName $lastName) złożył zamówienie.",
+                                                        "reservationId" to reservationId,
+                                                        "timestamp" to System.currentTimeMillis(),
+                                                        "type" to "item_reservation"
+                                                    )
+
+                                                    database.child("Notifications").child(adminUid).child(notifId).setValue(notification)
+                                                }
                                             }
                                         }
-                                    }
-                                    override fun onCancelled(error: DatabaseError) {}
-                                })
+
+                                        override fun onCancelled(error: DatabaseError) {}
+                                    })
+                                }
                             }
                         }
-                    }
 
-                    override fun onCancelled(error: DatabaseError) {}
-                })
-
+                        override fun onCancelled(error: DatabaseError) {}
+                    })
             }
-            .setNegativeButton("Anuluj", null)
-            .show()
+        }
+
+        alertDialog.show()
     }
+
 
 
 }

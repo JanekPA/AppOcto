@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -37,8 +38,22 @@ class HelpFragment : Fragment() {
         recyclerView = view.findViewById(R.id.faqRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
         val addButton = view.findViewById<Button>(R.id.buttonAddQuestion)
-        addButton.setOnClickListener {
-            showAddFaqDialog()
+        addButton.visibility = View.GONE // domyślnie ukryj przycisk
+
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            val uid = user.uid
+            val userRef = FirebaseDatabase.getInstance().getReference("UsersPersonalization/$uid")
+
+            userRef.child("role").get().addOnSuccessListener { snapshot ->
+                val isAdmin = snapshot.getValue(String::class.java) == "admin"
+                if (isAdmin) {
+                    addButton.visibility = View.VISIBLE
+                    addButton.setOnClickListener {
+                        showAddFaqDialog()
+                    }
+                }
+            }
         }
 
         val phoneText: TextView = view.findViewById(R.id.phoneContact)
@@ -75,7 +90,8 @@ class HelpFragment : Fragment() {
                         startActivity(intent)
                     }
                 }
-                loadFaq() // <--- DODAJ TO TUTAJ
+
+                loadFaq() // <-- ważne, żeby dane były załadowane po pobraniu kontaktów
             }
 
             override fun onCancelled(error: DatabaseError) {}
@@ -86,6 +102,7 @@ class HelpFragment : Fragment() {
 
         return view
     }
+
     private fun loadFaq() {
         val ref = FirebaseDatabase.getInstance().getReference("FAQ/Questions")
         ref.addListenerForSingleValueEvent(object : ValueEventListener {

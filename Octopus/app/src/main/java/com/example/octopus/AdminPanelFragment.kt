@@ -24,7 +24,10 @@ class AdminPanelFragment : Fragment() {
         statsButton.setOnClickListener {
             findNavController().navigate(R.id.action_adminPanel_to_statisticsFragment)
         }
-
+        val manageRolesButton = view.findViewById<Button>(R.id.manage_roles_button)
+        manageRolesButton.setOnClickListener {
+            findNavController().navigate(R.id.action_adminPanel_to_manageRolesFragment)
+        }
         return view
     }
 }

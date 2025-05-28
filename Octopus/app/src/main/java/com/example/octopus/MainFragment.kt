@@ -64,16 +64,22 @@ class MainFragment : Fragment() {
 
         scheduleRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                for ((dayIndex, dayName) in dayOrder.withIndex()) {
+                // Zapętlona kolejność dni tygodnia od dziś
+                val rotatedDayOrder = (dayOrder.subList(currentDayIndex, dayOrder.size) +
+                        dayOrder.subList(0, currentDayIndex))
+
+                for ((offset, dayName) in rotatedDayOrder.withIndex()) {
+                    val dayIndex = dayOrder.indexOf(dayName)
                     val daySnapshot = snapshot.child(dayName)
+
                     for (sessionSnapshot in daySnapshot.children) {
                         try {
                             val item = sessionSnapshot.getValue(ScheduleItem::class.java)
                             if (item != null && item.time.isNotBlank()) {
                                 val startMinutes = parseStartMinutes(item.time)
-                                val shouldInclude =
-                                    (dayIndex > currentDayIndex) ||
-                                            (dayIndex == currentDayIndex && startMinutes > currentMinutes)
+
+                                val isToday = (dayIndex == currentDayIndex)
+                                val shouldInclude = !isToday || startMinutes > currentMinutes
 
                                 if (shouldInclude) {
                                     upcomingSessions.add(
@@ -94,11 +100,10 @@ class MainFragment : Fragment() {
                             Log.w("MainFragment", "Nieprawidłowy wpis w bazie: ${sessionSnapshot.value}")
                         }
                     }
-
                 }
 
                 val sorted = upcomingSessions
-                    .sortedWith(compareBy({ it.dayIndex }, { it.startMinutes }))
+                    .sortedWith(compareBy({ it.dayIndex >= currentDayIndex }, { it.dayIndex }, { it.startMinutes }))
                     .take(10)
 
                 recyclerView.adapter = UpcomingSessionsAdapter(sorted)
@@ -110,6 +115,7 @@ class MainFragment : Fragment() {
             }
         })
     }
+
 
     private fun parseStartMinutes(time: String): Int {
         return try {

@@ -3,6 +3,6 @@
     android:shape="rectangle">
 
     <corners android:radius="16dp" />
-    <solid android:color="#CCCCCC" /> <!-- Zostanie nadpisany przez setTint -->
+    <solid android:color="#50CCCCCC" /> <!-- Zostanie nadpisany przez setTint -->
     <padding android:left="8dp" android:top="8dp" android:right="8dp" android:bottom="8dp"/>
 </shape>

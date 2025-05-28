@@ -22,6 +22,8 @@
         <item>Mała Sala</item>
         <item>Duża Sala</item>
     </string-array>
+    <string name="Small_room">Mała Sala</string>
+    <string name="Large_room">Duża Sala</string>
     <string-array name="days_of_week">
         <item>Poniedziałek</item>
         <item>Wtorek</item>
@@ -74,6 +76,40 @@
     <string-array name="payment_methods">
         <item>Gotówka</item>
     </string-array>
+    <string name="Login">Logowanie</string>
+    <string name="Login2">Zaloguj się!</string>
+    <string name="Logintoregister">Nie masz u nas konta? Zarejestruj się tutaj</string>
+    <string name="Name">Imię</string>
+    <string name="Sign_up">Rejestracja</string>
+    <string name="Sign_up2">Zarejestruj się!</string>
+    <string name="Username">Nazwa użytkownika</string>
+    <string name="Registertologin">Jesteś już użytkownikiem? Zaloguj się!</string>
+    <string name="email">Email</string>
+    <string name="password">Hasło</string>
+    <string name="Hello_user">Witaj, gościu!</string>
+    <string name="Hello_user_main">Witaj w aplikacji Octopus, użytkowniku!</string>
+    <string name="Close_schedule">Najbliższe zajęcia</string>
+    <string name="reservation">Rezerwacje</string>
+    <string name="trainers">Nasi trenerzy</string>
+    <string name="Prices">Cennik</string>
+    <string name="Check_availability">Sprawdź dostępność</string>
+    <string name="My_reservations">Moje rezerwacje</string>
+    <string name="Price">Cena</string>
+    <string name="Color">Kolor</string>
+    <string name="Size">Rozmiar</string>
+    <string name="Quantity">Ilość</string>
+    <string name="Training_type">Płaszczyzna treningu</string>
+    <string name="Group_level">Poziom zaawansowania</string>
+    <string name="Groups">Zajęcia</string>
+    <string name="List_trainers">Lista trenerów</string>
+    <string name="Date_trainers">Data treningu</string>
+    <string name="Pick_date">Wybierz datę</string>
+    <string name="Available_hours">Dostępne godziny</string>
+    <string name="Reserve_training">Zarezerwuj trening</string>
+    <string name="Contact">Kontakt</string>
+    <string name="Your_notifications">Twoje powiadomienia</string>
+    <string name="You_have_questions">Masz pytania? Skontaktuj się z nami!</string>
+    <string name="Contact_number"> Numer kontaktowy</string>
     <string name="polish">Polski</string>
     <string name="english">English</string>
     <string name="ukrainian">Українська</string>

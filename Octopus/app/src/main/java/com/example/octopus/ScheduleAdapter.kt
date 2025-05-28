@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -40,6 +41,7 @@ class ScheduleAdapter(
         val time: TextView = view.findViewById(R.id.item_time)
         val favoriteButton: View = view.findViewById(R.id.favorite_button)
         val favoriteButtonBackground: View = view.findViewById(R.id.favorite_button_background)
+        val groupLeveltext: TextView = view.findViewById(R.id.item_level_title)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScheduleViewHolder {
@@ -50,13 +52,27 @@ class ScheduleAdapter(
 
     override fun onBindViewHolder(holder: ScheduleViewHolder, position: Int) {
         val (id, item) = scheduleList[position]
-        holder.itemView.setBackgroundColor(
-            getBackgroundColor(item.classType, item.groupLevel)
+        val bgColor = getBackgroundColor(item.classType, item.groupLevel)
+        val gradientDrawable = GradientDrawable(
+            GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(
+                adjustColorBrightness(bgColor, 1.1f),  // jaśniejszy
+                adjustColorBrightness(bgColor, 0.9f)   // ciemniejszy
+            )
         )
-        holder.title.text = if (item.groupLevel != null)
-            "${item.classType} gr. ${item.groupLevel}"
-        else
-            item.classType
+        gradientDrawable.cornerRadius = 32f
+        holder.itemView.background = gradientDrawable
+
+        holder.title.text = item.classType
+        if(item.groupLevel!=null && item.groupLevel != "sparingi"){
+            holder.groupLeveltext.text = "gr. "+item.groupLevel
+        }
+        else if (item.groupLevel == "sparingi"){
+            holder.groupLeveltext.text = item.groupLevel
+        }
+        else{
+            holder.groupLeveltext.text=""
+        }
         val user = FirebaseAuth.getInstance().currentUser
         val favKey = "${item.classType}_${item.groupLevel}_${item.time}"
         var isFavorite = false
@@ -145,41 +161,46 @@ class ScheduleAdapter(
     private fun getBackgroundColor(classType: String?, groupLevel: String?): Int {
         return when (classType?.lowercase()) {
             "mma" -> when (groupLevel?.lowercase()) {
-                "podstawowa" -> Color.parseColor("#D3D3D3")
-                "średnio zaawansowana" -> Color.parseColor("#EAEAEA")
-                "pro" -> Color.parseColor("#444444")
+                "początkująca" -> Color.parseColor("#747472")
+                "średnio zaawansowana" -> Color.parseColor("#C4C4C4")
+                "pro" -> Color.parseColor("#4D4B4A")
                 else -> Color.parseColor("#EAEAEA")
             }
 
             "bjj" -> when (groupLevel?.lowercase()) {
-                "początkująca" -> Color.parseColor("#D0E7FF")
-                "łączona" -> Color.parseColor("#7DBBFF")
-                "sparingi" -> Color.parseColor("#4589BF")
-                "pro" -> Color.parseColor("#1E3F66")
-                "kids", "family" -> Color.parseColor("#CFFFE5")
+                "początkująca" -> Color.parseColor("#26ADE5")
+                "łączona" -> Color.parseColor("#273B6C")
+                "sparingi" -> Color.parseColor("#435481")
+                "pro" -> Color.parseColor("#232F50")
+                "kids", "family" -> Color.parseColor("#BCCD44")
                 else -> Color.parseColor("#7DBBFF")
             }
 
-            "zapasy" -> Color.parseColor("#FF9999")
-            "no-gi" -> Color.parseColor("#5D9CEC")
+            "zapasy" -> Color.parseColor("#B32C26")
+            "no-gi" -> Color.parseColor("#3288BF")
             "boks" -> when (groupLevel?.lowercase()) {
-                "średnio zaawansowany" -> Color.parseColor("#FFF9C4")
-                "zaawansowany" -> Color.parseColor("#FFD700")
-                "łączona" -> Color.parseColor("#FFEB3B")
+                "średnio zaawansowany" -> Color.parseColor("#F1BA1A")
+                "zaawansowany" -> Color.parseColor("#D08C1D")
+                "łączona" -> Color.parseColor("#D59824")
                 else -> Color.parseColor("#FFEB3B")
             }
 
             "kick-boxing" -> when (groupLevel?.lowercase()) {
-                "junior" -> Color.parseColor("#CCFFCC")
-                "łączona" -> Color.parseColor("#66CC66")
-                "początkująca" -> Color.parseColor("#99CC99")
-                "średnio zaawansowana", "pro" -> Color.parseColor("#2E7D32")
-                else -> Color.parseColor("#66CC66")
+                "junior" -> Color.parseColor("#5CAA80")
+                "łączona" -> Color.parseColor("#3CA390")
+                "początkująca" -> Color.parseColor("#3EA294")
+                "średnio zaawansowana", "pro" -> Color.parseColor("#36907A")
+                else -> Color.parseColor("#36907A")
             }
 
-            "wolna mata" -> Color.parseColor("#E1BEE7")
+            "wolna mata" -> Color.parseColor("#BBACD5")
             else -> Color.LTGRAY
         }
     }
-
+    private fun adjustColorBrightness(color: Int, factor: Float): Int {
+        val r = ((Color.red(color) * factor).coerceAtMost(255f)).toInt()
+        val g = ((Color.green(color) * factor).coerceAtMost(255f)).toInt()
+        val b = ((Color.blue(color) * factor).coerceAtMost(255f)).toInt()
+        return Color.rgb(r, g, b)
+    }
 }

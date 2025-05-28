@@ -1,16 +1,20 @@
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/cardViewTrainer"
+<com.google.android.material.card.MaterialCardView android:id="@+id/cardViewTrainer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    android:layout_marginTop="8dp"
-    android:padding="16dp"
-    android:backgroundTint="@android:color/white">
+    android:layout_margin="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="#DDDDDD"
+    android:backgroundTint="#FDFDFD"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <TextView
             android:id="@+id/textViewTrainerName"
@@ -18,7 +22,8 @@
             android:layout_height="wrap_content"
             android:text="Imię i nazwisko"
             android:textStyle="bold"
-            android:textSize="18sp"
+            android:textSize="20sp"
+            android:textColor="#212121"
             android:layout_marginBottom="4dp" />
 
         <TextView
@@ -27,8 +32,6 @@
             android:layout_height="wrap_content"
             android:text="Typy zajęć"
             android:textSize="14sp"
-            android:layout_marginBottom="2dp" />
-
-
+            android:textColor="#666666" />
     </LinearLayout>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

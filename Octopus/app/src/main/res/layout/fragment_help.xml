@@ -5,14 +5,28 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@drawable/octopus_background3"
-    android:padding="16dp">
+    android:padding="16dp"
+    >
 
+    <TextView
+        android:id="@+id/helpDesc"
+        android:text="Najczęściej zadawane pytania"
+        android:layout_gravity="center"
+        android:textSize="17sp"
+        android:textColor="#E0E0E0"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:shadowColor="#000000"
+        android:shadowDx="0"
+        android:shadowDy="0"
+        android:shadowRadius="8" />
     <!-- FAQ List (70%) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/faqRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="7"
+        android:layout_marginTop="20dp"
         android:clipToPadding="false"
         android:paddingBottom="8dp"
         android:scrollbars="vertical"
@@ -29,7 +43,7 @@
     <LinearLayout
         android:id="@+id/contactSection"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="10dp"
         android:layout_weight="3"
         android:orientation="vertical"
         android:padding="12dp">
@@ -37,7 +51,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Masz pytania? Skontaktuj się z nami!"
+            android:text="@string/You_have_questions"
             android:textSize="16sp"
             android:textStyle="bold"
             android:textColor="#FF4500"
@@ -64,7 +78,7 @@
 
             <TextView
                 android:id="@+id/phoneContact"
-                android:text="Numer kontaktowy"
+                android:text="@string/Contact_number"
                 android:textSize="17sp"
                 android:textColor="#E0E0E0"
                 android:layout_height="wrap_content"
@@ -90,7 +104,7 @@
 
             <TextView
                 android:id="@+id/mailContact"
-                android:text="Email:"
+                android:text="@string/email"
                 android:textSize="17sp"
                 android:textColor="#E0E0E0"
                 android:layout_height="wrap_content"

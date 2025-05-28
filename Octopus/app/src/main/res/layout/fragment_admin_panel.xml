@@ -16,4 +16,11 @@
         android:layout_height="wrap_content"
         android:text="Statystyki"
         android:layout_marginTop="16dp"/>
+    <Button
+        android:id="@+id/manage_roles_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Zarządzaj rolami"
+        android:layout_marginTop="16dp"/>
+
 </LinearLayout>

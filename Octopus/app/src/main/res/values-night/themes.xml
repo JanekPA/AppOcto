@@ -1,7 +1,13 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.Octopus" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+    <style name="Theme.Octopus" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#FF8D21</item>
+        <item name="colorSecondary">#FFA726</item>
+        <item name="colorError">#003366</item>
+
+        <item name="colorSurface">#1E1E1E</item>
+
+        <item name="colorOnPrimary">#000000</item>
+        <item name="colorOnBackground">#FFFFFF</item>
+        <item name="colorOnSurface">#FFFFFF</item>
     </style>
-</resources>
+    </resources>

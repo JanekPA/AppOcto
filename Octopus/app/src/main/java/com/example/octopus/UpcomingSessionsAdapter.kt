@@ -11,13 +11,14 @@ class UpcomingSessionsAdapter(
 ) : RecyclerView.Adapter<UpcomingSessionsAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val title: TextView = view.findViewById(R.id.item_title)
-        val time: TextView = view.findViewById(R.id.item_time)
+        val title: TextView = view.findViewById(R.id.session_title)
+        val time: TextView = view.findViewById(R.id.session_time)
+        val day: TextView = view.findViewById(R.id.session_day)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.schedule_item, parent, false)
+            .inflate(R.layout.item_upcoming_session, parent, false)
         return ViewHolder(view)
     }
 
@@ -25,10 +26,9 @@ class UpcomingSessionsAdapter(
         val session = sessions[position]
 
         val group = session.groupLevel?.let { "gr. $it" } ?: ""
-        val fullTitle = "${session.day}, ${session.time} – ${session.classType} $group, ${session.room}"
-
-        holder.title.text = fullTitle.trim()
-        holder.time.text = "" // Jeśli chcesz wyświetlać czas osobno, wpisz tu session.time
+        holder.day.text = session.day
+        holder.title.text = session.classType + ", " + group
+        holder.time.text = session.time
     }
 
     override fun getItemCount(): Int = sessions.size

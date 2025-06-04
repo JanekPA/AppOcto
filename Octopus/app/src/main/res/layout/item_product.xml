@@ -12,37 +12,43 @@
         android:layout_height="wrap_content"
         android:text="Nazwa"
         android:textStyle="bold"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:textColor="@color/white"/>
     <TextView
         android:id="@+id/priceText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Cena: 0.00 zł"
         android:textStyle="bold"
-        android:textSize="14sp" />
+        android:textSize="14sp"
+        android:textColor="@color/white"/>
 
     <TextView
         android:id="@+id/textViewColor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/Color" />
+        android:text="@string/Color"
+        android:textColor="@color/white"/>
 
     <TextView
         android:id="@+id/textViewType"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Typ" />
+        android:text="Typ"
+        android:textColor="@color/white"/>
 
     <TextView
         android:id="@+id/textViewSize"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/Size" />
+        android:text="@string/Size"
+        android:textColor="@color/white"/>
 
     <TextView
         android:id="@+id/textViewQuantity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/Quantity" />
+        android:text="@string/Quantity"
+        android:textColor="@color/white"/>
 
 </LinearLayout>

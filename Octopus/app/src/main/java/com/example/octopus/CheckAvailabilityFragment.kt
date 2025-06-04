@@ -22,7 +22,6 @@ class CheckAvailabilityFragment : Fragment() {
 
     private lateinit var database: DatabaseReference
     private lateinit var adapter: ItemsAdapter
-
     private var currentType: String = "Sprzęt"
     private val items = mutableListOf<Item>()
 
@@ -35,10 +34,14 @@ class CheckAvailabilityFragment : Fragment() {
         itemTypeSpinner = view.findViewById(R.id.itemTypeSpinner)
         recyclerView = view.findViewById(R.id.itemsRecyclerView)
         addItemButton = view.findViewById(R.id.addItemButton)
-
+        val itemTypes = resources.getStringArray(R.array.item_types)
+        val spinnerAdapter = ArrayAdapter(requireContext(), R.layout.spinner_item, itemTypes)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) // lub własny
+        itemTypeSpinner.adapter = spinnerAdapter
         adapter = ItemsAdapter(items) { selectedItem ->
             showReservationDialog(selectedItem)
         }
+
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
@@ -117,7 +120,7 @@ class CheckAvailabilityFragment : Fragment() {
                 R.array.item_type_options,
                 android.R.layout.simple_spinner_item
             ).also {
-                it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                it.setDropDownViewResource(R.layout.spinner_item)
                 typeSpinner.adapter = it
             }
 
@@ -126,7 +129,7 @@ class CheckAvailabilityFragment : Fragment() {
                 R.array.item_size_options,
                 android.R.layout.simple_spinner_item
             ).also {
-                it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                it.setDropDownViewResource(R.layout.spinner_item)
                 sizeSpinner.adapter = it
             }
         }

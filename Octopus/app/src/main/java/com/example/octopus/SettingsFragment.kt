@@ -26,7 +26,7 @@ class SettingsFragment : Fragment() {
         themeSpinner = view.findViewById(R.id.spinner_theme)
         // Ustaw adapter
         val themeNames = resources.getStringArray(R.array.themes_array)
-        val themeAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, themeNames)
+        val themeAdapter = ArrayAdapter(requireContext(), R.layout.spinner_item, themeNames)
         themeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         themeSpinner.adapter = themeAdapter
         languageSpinner = view.findViewById(R.id.spinner_language)
@@ -35,7 +35,7 @@ class SettingsFragment : Fragment() {
             getString(R.string.english),
             getString(R.string.ukrainian)
         )
-        val langAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, languageNames)
+        val langAdapter = ArrayAdapter(requireContext(), R.layout.spinner_item, languageNames)
         langAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         languageSpinner.adapter = langAdapter
 

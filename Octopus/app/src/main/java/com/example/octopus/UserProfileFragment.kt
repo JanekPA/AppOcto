@@ -27,6 +27,7 @@ class UserProfileFragment : Fragment() {
     private lateinit var reservationList: RecyclerView
     private lateinit var imieWarning: TextView
     private lateinit var nazwiskoWarning: TextView
+    private lateinit var phoneNumberWarning: TextView
     private lateinit var usernameWarning: TextView
     private val reservations = mutableListOf<Map<String, Any>>()
     private lateinit var database: DatabaseReference
@@ -53,7 +54,7 @@ class UserProfileFragment : Fragment() {
         imieWarning = view.findViewById(R.id.imie_warning)
         nazwiskoWarning = view.findViewById(R.id.nazwisko_warning)
         usernameWarning = view.findViewById(R.id.username_warning)
-
+        phoneNumberWarning = view.findViewById(R.id.phoneNumber_warning)
         database = FirebaseDatabase.getInstance().reference
         storage = FirebaseStorage.getInstance()
         adapter = ReservationAdapter(reservations) { reservation ->
@@ -94,10 +95,11 @@ class UserProfileFragment : Fragment() {
                     imieWarning.visibility = if (editImie.text.isEmpty()) View.VISIBLE else View.GONE
                     nazwiskoWarning.visibility = if (editNazwisko.text.isEmpty()) View.VISIBLE else View.GONE
                     usernameWarning.visibility = if (editUsername.text.isEmpty()) View.VISIBLE else View.GONE
-
+                    phoneNumberWarning.visibility = if (editPhone.text.isEmpty()) View.VISIBLE else View.GONE
                     val imageUrl = snapshot.child("profileImageUrl").getValue(String::class.java)
                     if (!imageUrl.isNullOrEmpty()) {
-                        Glide.with(this@UserProfileFragment).load(imageUrl).into(profileImage)
+                        Glide.with(this@UserProfileFragment).load(imageUrl).circleCrop().into(profileImage)
+
                     }
                 }
             }

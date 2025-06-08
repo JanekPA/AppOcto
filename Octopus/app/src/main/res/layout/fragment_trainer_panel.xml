@@ -76,7 +76,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Imię i nazwisko" />
+                android:text="Imię i nazwisko"
+                android:textColor="@color/white"/>
 
 
         </LinearLayout>
@@ -92,7 +93,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Kontakt" />
+                android:text="Kontakt"
+                android:textColor="@color/white"/>
 
 
         </LinearLayout>
@@ -110,7 +112,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Opis trenera" />
+                android:text="Opis trenera"
+                android:textColor="@color/white"/>
 
 
         </LinearLayout>

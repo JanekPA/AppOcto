@@ -48,6 +48,7 @@ class StatisticsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         statTypeSpinner = view.findViewById(R.id.stat_type_spinner)
+        val types = resources.getStringArray(R.array.statistics_types)
         dateInput = view.findViewById(R.id.date_input)
         roomSpinner = view.findViewById(R.id.room_spinner)
         trainingMulti = view.findViewById(R.id.training_multi)
@@ -65,7 +66,9 @@ class StatisticsFragment : Fragment() {
 
         setupMultiAutoComplete(trainingMulti, trainings)
         setupMultiAutoComplete(levelMulti, levels)
-
+        val adapter = ArrayAdapter(requireContext(), R.layout.spinner_item, types)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        statTypeSpinner.adapter = adapter
         statTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 updateFiltersVisibility()
@@ -166,7 +169,7 @@ class StatisticsFragment : Fragment() {
     }
 
     private fun setupSpinner(spinner: Spinner, items: List<String>) {
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, items)
+        val adapter = ArrayAdapter(requireContext(), R.layout.spinner_item, items)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter
     }

@@ -1,18 +1,27 @@
 package com.example.octopus
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.DatePickerDialog
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.google.firebase.storage.FirebaseStorage
+import com.yalantis.ucrop.UCrop
+import java.io.File
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -40,7 +49,7 @@ class TrainersFragment : Fragment() {
     private var selectedTrainer: Trainer? = null
     private var selectedDate: String = LocalDate.now().format(DateTimeFormatter.ISO_DATE) // domyślnie dziś
     private var selectedHour: String? = null
-
+    private var selectedImageUri: Uri? = null
     private lateinit var trainersAdapter: TrainersAdapter
 
 
@@ -53,7 +62,6 @@ class TrainersFragment : Fragment() {
         val addTrainerButton: Button = view.findViewById(R.id.buttonAddTrainer)
         val editTrainerButton: Button = view.findViewById(R.id.editTrainerButton)
         val addHoursButton: Button = view.findViewById(R.id.addHoursButton) // ← Dodany przycisk, jeśli masz go w layout
-
         // Domyślnie ukrywamy przyciski administracyjne
         addTrainerButton.visibility = View.GONE
         editTrainerButton.visibility = View.GONE
@@ -186,7 +194,37 @@ class TrainersFragment : Fragment() {
         hoursRecyclerView.adapter = hoursAdapter
         return view
     }
+    private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            val destinationUri = Uri.fromFile(File(requireContext().cacheDir, "cropped_image.jpg"))
+            val uCropIntent = UCrop.of(it, destinationUri)
+                .withAspectRatio(1f, 1f)
+                .withMaxResultSize(800, 800)
+                .getIntent(requireContext())
 
+            uCropLauncher.launch(uCropIntent)
+        }
+    }
+    // Zmienna pomocnicza (tymczasowy dostęp do ImageView)
+    private var tempCoachImageView: ImageView? = null
+    private val uCropLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val resultUri = UCrop.getOutput(result.data!!)
+            resultUri?.let { uri ->
+                selectedImageUri = uri
+
+                tempCoachImageView?.let { imageView ->
+                    Glide.with(this)
+                        .load(uri)
+                        .apply(RequestOptions().circleCrop())
+                        .into(imageView)
+                }
+            }
+        } else if (result.resultCode == UCrop.RESULT_ERROR) {
+            val error = UCrop.getError(result.data!!)
+            Toast.makeText(requireContext(), "Błąd kadrowania: ${error?.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     private fun showAddTrainerDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_add_trainer, null)
@@ -196,7 +234,7 @@ class TrainersFragment : Fragment() {
         val emailInput = dialogView.findViewById<EditText>(R.id.editTextEmail)
         val facebookInput = dialogView.findViewById<EditText>(R.id.editTextFacebook)
         val instagramInput = dialogView.findViewById<EditText>(R.id.editTextInstagram)
-
+        val coachImage = dialogView.findViewById<ImageView>(R.id.coach_image)
         val classTypesText = dialogView.findViewById<TextView>(R.id.textViewClassTypes)
         val groupLevelsText = dialogView.findViewById<TextView>(R.id.textViewGroupLevels)
 
@@ -254,7 +292,7 @@ class TrainersFragment : Fragment() {
                 val surname = surnameInput.text.toString()
                 val email = emailInput.text.toString().replace(".",",")
                 val key = email
-
+                val selectImageBtn: ImageView = requireView().findViewById(R.id.btn_select_image)
                 val trainerData = mapOf(
                     "name" to name,
                     "surname" to surname,
@@ -267,6 +305,35 @@ class TrainersFragment : Fragment() {
                 )
                 trainersRef.child(key).setValue(trainerData)
                 Toast.makeText(requireContext(), "Trener dodany!", Toast.LENGTH_SHORT).show()
+                selectedImageUri?.let { uri ->
+                    val fullName =
+                        "${emailInput.text}"
+                    val storageRef =
+                        FirebaseStorage.getInstance().reference.child("profile_images/$fullName")
+                    Glide.with(this)
+                        .load(uri)
+                        .apply(RequestOptions().circleCrop().fitCenter())
+                        .into(coachImage)
+
+                    storageRef.putFile(uri)
+                        .addOnSuccessListener {
+                            Toast.makeText(
+                                requireContext(),
+                                "Zdjęcie przesłane",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        .addOnFailureListener {
+                            Toast.makeText(
+                                requireContext(),
+                                "Błąd przesyłania zdjęcia",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                }
+                selectImageBtn.setOnClickListener {
+                    imagePickerLauncher.launch("image/*")
+                }
                 loadTrainers()
             }
             .setNegativeButton("Anuluj", null)
@@ -363,8 +430,10 @@ class TrainersFragment : Fragment() {
     private fun loadClassTypes() {
         classTypesRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val types = snapshot.children.mapNotNull { it.getValue(String::class.java) } // ZMIANA
-                trainingTypeSpinner.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, types)
+                val types = snapshot.children.mapNotNull { it.getValue(String::class.java) }
+                val classTypesAdapter = ArrayAdapter(requireContext(), R.layout.spinner_item, types)
+                classTypesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                trainingTypeSpinner.adapter = classTypesAdapter
             }
 
             override fun onCancelled(error: DatabaseError) {}
@@ -374,8 +443,11 @@ class TrainersFragment : Fragment() {
     private fun loadGroupLevels() {
         groupLevelsRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val levels = snapshot.children.mapNotNull { it.getValue(String::class.java) } // ZMIANA
-                groupLevelSpinner.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, levels)
+                val levels = snapshot.children.mapNotNull { it.getValue(String::class.java) }
+                val groupLevelAdapter = ArrayAdapter(requireContext(), R.layout.spinner_item, levels)
+                groupLevelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                groupLevelSpinner.adapter = groupLevelAdapter
+
             }
 
             override fun onCancelled(error: DatabaseError) {}
@@ -542,7 +614,8 @@ class TrainersFragment : Fragment() {
         val instagramInput = dialogView.findViewById<EditText>(R.id.editTextInstagram)
         val classTypesText = dialogView.findViewById<TextView>(R.id.textViewClassTypes)
         val groupLevelsText = dialogView.findViewById<TextView>(R.id.textViewGroupLevels)
-
+        val selectImageBtn = dialogView.findViewById<Button>(R.id.btn_select_image)
+        val coachImage = dialogView.findViewById<ImageView>(R.id.coach_image)
         nameInput.setText(trainer.name)
         surnameInput.setText(trainer.surname)
 
@@ -560,7 +633,9 @@ class TrainersFragment : Fragment() {
 
         val types = mutableListOf<String>()
         val levels = mutableListOf<String>()
-
+        selectImageBtn.setOnClickListener {
+            imagePickerLauncher.launch("image/*")
+        }
         classTypesRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 types.addAll(snapshot.children.mapNotNull { it.getValue(String::class.java) })
@@ -608,6 +683,7 @@ class TrainersFragment : Fragment() {
         })
 
         AlertDialog.Builder(requireContext())
+
             .setTitle("Edytuj dane trenera")
             .setView(dialogView)
             .setPositiveButton("Zapisz") { _, _ ->
@@ -634,6 +710,33 @@ class TrainersFragment : Fragment() {
                 trainersRef.child(newKey).setValue(updatedData)
 
                 Toast.makeText(requireContext(), "Dane zaktualizowane!", Toast.LENGTH_SHORT).show()
+                selectedImageUri?.let { uri ->
+                    val fullName =
+                        "${emailInput.text}"
+                    val storageRef =
+                        FirebaseStorage.getInstance().reference.child("profile_images/$fullName")
+                    Glide.with(this)
+                        .load(uri)
+                        .apply(RequestOptions().circleCrop().fitCenter())
+                        .into(coachImage)
+
+                    storageRef.putFile(uri)
+                        .addOnSuccessListener {
+                            Toast.makeText(
+                                requireContext(),
+                                "Zdjęcie przesłane",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        .addOnFailureListener {
+                            Toast.makeText(
+                                requireContext(),
+                                "Błąd przesyłania zdjęcia",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                }
+
                 loadTrainers()
             }
             .setNegativeButton("Anuluj", null)
@@ -670,6 +773,19 @@ class TrainersFragment : Fragment() {
                     requireView().findViewById<TextView>(R.id.contactEmail).text = trainer.email
                     requireView().findViewById<TextView>(R.id.contactFb).text = trainer.facebook
                     requireView().findViewById<TextView>(R.id.contactInsta).text = trainer.instagram
+                    val coachImage = requireView().findViewById<ImageView>(R.id.coach_image)
+                    val storageRef = FirebaseStorage.getInstance().getReference("profile_images/${trainer.email}")
+                    storageRef.downloadUrl
+                        .addOnSuccessListener { uri ->
+                            Glide.with(requireContext())
+                                .load(uri)
+                                .apply(RequestOptions().circleCrop().fitCenter())
+                                .into(coachImage!!)
+                        }
+                        .addOnFailureListener {
+                            Log.e("TrainersFragment", "Nie udało się załadować zdjęcia: ${it.message}")
+                        }
+
 
                     updateAvailableHours()
 
@@ -706,6 +822,23 @@ class TrainersFragment : Fragment() {
                 requireView().findViewById<TextView>(R.id.contactEmail).text = trainer.email
                 requireView().findViewById<TextView>(R.id.contactFb).text = trainer.facebook
                 requireView().findViewById<TextView>(R.id.contactInsta).text = trainer.instagram
+                val coachImage = view?.findViewById<ImageView>(R.id.coach_image)
+                // Ładowanie zdjęcia z Firebase Storage
+                val imageRefPath = "profile_images/${trainer.email}"
+                val storageRef = FirebaseStorage.getInstance()
+                    .reference.child(imageRefPath)
+                storageRef.downloadUrl
+                    .addOnSuccessListener { uri ->
+                        Glide.with(this)
+                            .load(uri)
+                            .apply(RequestOptions.circleCropTransform())
+                            .into(coachImage!!)
+
+                    }
+                    .addOnFailureListener {
+                        coachImage!!.setImageResource(R.drawable.ic_person)
+                    }
+                tempCoachImageView = coachImage
 
                 updateAvailableHours()
 

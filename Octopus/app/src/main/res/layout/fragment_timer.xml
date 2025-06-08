@@ -8,12 +8,26 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="24dp">
+    <TextView
+        android:id="@+id/title_stoper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Stoper"
+        android:layout_marginTop="-60dp"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:layout_marginBottom="24dp"/>
+
 
     <EditText
         android:id="@+id/input_round_time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Czas rundy (sekundy)"
+        android:textColorHint="@color/white"
+        android:textColor="@color/white"
         android:inputType="number" />
 
     <EditText
@@ -21,6 +35,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Czas przerwy (sekundy)"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white"
         android:inputType="number" />
 
     <EditText
@@ -28,6 +44,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Liczba rund"
+        android:textColorHint="@color/white"
+        android:textColor="@color/white"
         android:inputType="number" />
 
     <com.airbnb.lottie.LottieAnimationView

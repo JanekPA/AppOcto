@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/trainersScrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -34,11 +35,14 @@
                     android:layout_height="wrap_content"
                     android:text="@string/Training_type"
                     android:textStyle="bold"
+                    android:textColor="@color/white"
                     android:layout_marginBottom="4dp" />
 
                 <Spinner
                     android:id="@+id/spinnerTrainingType"
                     android:layout_width="match_parent"
+                    android:spinnerMode="dropdown"
+                    android:background="@drawable/spinner_background"
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
@@ -54,11 +58,14 @@
                     android:layout_height="wrap_content"
                     android:text="@string/Group_level"
                     android:textStyle="bold"
+                    android:textColor="@color/white"
                     android:layout_marginBottom="4dp" />
 
                 <Spinner
                     android:id="@+id/spinnerGroupLevel"
                     android:layout_width="match_parent"
+                    android:spinnerMode="dropdown"
+                    android:background="@drawable/spinner_background"
                     android:layout_height="wrap_content" />
             </LinearLayout>
         </LinearLayout>
@@ -68,6 +75,7 @@
             android:layout_height="wrap_content"
             android:text="@string/List_trainers"
             android:textStyle="bold"
+            android:textColor="@color/white"
             android:layout_marginBottom="4dp" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -82,6 +90,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/Date_trainers"
+            android:textColor="@color/white"
             android:textStyle="bold"
             android:layout_marginBottom="4dp" />
 
@@ -99,6 +108,7 @@
             android:layout_height="wrap_content"
             android:text="@string/Available_hours"
             android:textStyle="bold"
+            android:textColor="@color/white"
             android:layout_marginBottom="4dp" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -137,113 +147,132 @@
             android:id="@+id/contactContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:background="@drawable/contact_card_background"
             android:backgroundTint="@android:color/darker_gray"
             android:padding="16dp"
             android:layout_marginBottom="16dp"
             android:visibility="gone">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/Contact"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="#FF4500"
-                android:shadowColor="#000000"
-                android:shadowDx="0"
-                android:shadowDy="0"
-                android:shadowRadius="8"
-                android:layout_gravity="center"/>
-            <!-- Telefon -->
+
+            <!-- Kolumna: zdjęcie -->
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/coach_image"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center_vertical"
+                android:scaleType="centerCrop"
+                android:adjustViewBounds="true"
+                android:src="@drawable/ic_person"
+                app:shapeAppearanceOverlay="@style/CircleImageView"
+                android:layout_marginEnd="16dp" />
+
+            <!-- Kolumna: dane kontaktowe -->
             <LinearLayout
-                android:id="@+id/contactPhoneRow"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingVertical="4dp">
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_baseline_call_24"
-                    android:contentDescription="Telefon"
-                    />
+                android:layout_weight="1"
+                android:orientation="vertical">
+
                 <TextView
-                    android:id="@+id/contactPhone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@android:color/white"
-                    android:layout_marginStart="8dp"/>
-            </LinearLayout>
+                    android:text="@string/Contact"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#FF4500"
+                    android:shadowColor="#000000"
+                    android:shadowDx="0"
+                    android:shadowDy="0"
+                    android:shadowRadius="8"
+                    android:layout_gravity="start"
+                    android:layout_marginBottom="8dp"/>
 
-            <!-- Email -->
-            <LinearLayout
-                android:id="@+id/contactEmailRow"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingVertical="4dp">
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/gmail_icon"
-                    android:contentDescription="Email"
-                    />
-                <TextView
-                    android:id="@+id/contactEmail"
-                    android:layout_width="wrap_content"
+                <!-- Telefon -->
+                <LinearLayout
+                    android:id="@+id/contactPhoneRow"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@android:color/white"
-                    android:layout_marginStart="8dp"/>
-            </LinearLayout>
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="4dp">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_baseline_call_24"
+                        android:contentDescription="Telefon" />
+                    <TextView
+                        android:id="@+id/contactPhone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/white"
+                        android:layout_marginStart="8dp"/>
+                </LinearLayout>
 
-            <!-- Facebook -->
-            <LinearLayout
-                android:id="@+id/contactFbRow"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingVertical="4dp">
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/fb_icon"
-                    android:contentDescription="Facebook"
-                    />
-                <TextView
-                    android:id="@+id/contactFb"
-                    android:layout_width="wrap_content"
+                <!-- Email -->
+                <LinearLayout
+                    android:id="@+id/contactEmailRow"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@android:color/white"
-                    android:layout_marginStart="8dp"/>
-            </LinearLayout>
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="4dp">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/gmail_icon"
+                        android:contentDescription="Email" />
+                    <TextView
+                        android:id="@+id/contactEmail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/white"
+                        android:layout_marginStart="8dp"/>
+                </LinearLayout>
 
-            <!-- Instagram -->
-            <LinearLayout
-                android:id="@+id/contactInstaRow"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingVertical="4dp">
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/instagram_icon"
-                    android:contentDescription="Instagram"
-                    />
-                <TextView
-                    android:id="@+id/contactInsta"
-                    android:layout_width="wrap_content"
+                <!-- Facebook -->
+                <LinearLayout
+                    android:id="@+id/contactFbRow"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@android:color/white"
-                    android:layout_marginStart="8dp"/>
-            </LinearLayout>
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="4dp">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/fb_icon"
+                        android:contentDescription="Facebook" />
+                    <TextView
+                        android:id="@+id/contactFb"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/white"
+                        android:layout_marginStart="8dp"/>
+                </LinearLayout>
 
+                <!-- Instagram -->
+                <LinearLayout
+                    android:id="@+id/contactInstaRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="4dp">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/instagram_icon"
+                        android:contentDescription="Instagram" />
+                    <TextView
+                        android:id="@+id/contactInsta"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/white"
+                        android:layout_marginStart="8dp"/>
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
+
 
         <!-- Przyciski admina -->
         <Button

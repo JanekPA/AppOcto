@@ -13,6 +13,7 @@
         android:text="@string/settings"
         android:textSize="24sp"
         android:textStyle="bold"
+        android:textColor="@color/white"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
 
@@ -22,6 +23,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/push_notify"
+        android:textColor="@color/white"
+        android:visibility = "gone"
         android:textSize="18sp"
         app:layout_constraintTop_toBottomOf="@id/tv_settings_title"
         app:layout_constraintStart_toStartOf="parent"
@@ -32,6 +35,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:checked="false"
+        android:visibility="gone"
         app:layout_constraintTop_toTopOf="@id/tv_notifications"
         app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -41,17 +45,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/theme"
+        android:textColor="@color/white"
         android:textSize="18sp"
         app:layout_constraintTop_toBottomOf="@id/tv_notifications"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="24dp" />
 
     <Spinner
         android:id="@+id/spinner_theme"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:spinnerMode="dropdown"
+        android:background="@drawable/spinner_background"
         app:layout_constraintTop_toTopOf="@id/tv_theme"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="8dp" />
 
     <!-- Język -->
     <TextView
@@ -59,16 +67,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/language"
+        android:textColor="@color/white"
         android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@id/tv_theme"
+        app:layout_constraintTop_toBottomOf="@id/spinner_theme"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="24dp" />
 
     <Spinner
         android:id="@+id/spinner_language"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:spinnerMode="dropdown"
+        android:background="@drawable/spinner_background"
         app:layout_constraintTop_toTopOf="@id/tv_language"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

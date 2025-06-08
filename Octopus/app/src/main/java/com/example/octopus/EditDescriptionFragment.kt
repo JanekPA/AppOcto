@@ -263,7 +263,7 @@ class EditDescriptionFragment : Fragment() {
 
                     // Ładowanie zdjęcia z Firebase Storage
                     val imageRefPath = "trainers_images/${name}_${surname}".replace(" ", "_")
-                    val storageRef = com.google.firebase.storage.FirebaseStorage.getInstance()
+                    val storageRef = FirebaseStorage.getInstance()
                         .reference.child(imageRefPath)
 
                     storageRef.downloadUrl
@@ -369,7 +369,7 @@ class EditDescriptionFragment : Fragment() {
 
                 // Ładowanie zdjęcia z Firebase Storage
                 val imageRefPath = "trainers_images/${name}_${surname}".replace(" ", "_")
-                val storageRef = com.google.firebase.storage.FirebaseStorage.getInstance()
+                val storageRef = FirebaseStorage.getInstance()
                     .reference.child(imageRefPath)
 
                 storageRef.downloadUrl

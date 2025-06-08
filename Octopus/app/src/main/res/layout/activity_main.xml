@@ -39,7 +39,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?android:attr/windowBackground"
-            app:menu="@menu/bottom_nav_menu"/>
+            app:itemIconTint="@color/black"
+            app:itemTextColor="?attr/colorOnBackground"
+            app:menu="@menu/bottom_nav_menu"
+            />
     </LinearLayout>
 
     <!-- Navigation Drawer (wysuwane z prawej strony) -->

@@ -25,13 +25,17 @@
             android:layout_height="wrap_content"
             android:textStyle="bold"
             android:text="Email"
+            android:textColor="@android:color/holo_orange_light"
+            android:textSize="18dp"
             android:paddingTop="8dp" />
 
         <EditText
             android:id="@+id/edit_imie"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Imię" />
+            android:hint="Imię"
+            android:textColor="@color/white"
+            android:textColorHint="@android:color/holo_orange_light"/>
         <TextView
             android:id="@+id/imie_warning"
             android:layout_width="wrap_content"
@@ -44,7 +48,9 @@
             android:id="@+id/edit_nazwisko"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Nazwisko" />
+            android:hint="Nazwisko"
+            android:textColor="@color/white"
+            android:textColorHint="@android:color/holo_orange_light"/>
         <TextView
             android:id="@+id/nazwisko_warning"
             android:layout_width="wrap_content"
@@ -57,7 +63,9 @@
             android:id="@+id/edit_username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Nazwa użytkownika" />
+            android:hint="Nazwa użytkownika"
+            android:textColor="@color/white"
+            android:textColorHint="@android:color/holo_orange_light"/>
         <TextView
             android:id="@+id/username_warning"
             android:layout_width="wrap_content"
@@ -71,7 +79,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Numer telefonu"
+            android:textColor="@color/white"
+            android:textColorHint="@android:color/holo_orange_light"
             android:inputType="phone" />
+        <TextView
+            android:id="@+id/phoneNumber_warning"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dodaj numer telefonu"
+            android:textColor="@android:color/holo_red_dark"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/save_button"
@@ -84,6 +101,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Twoje rezerwacje:"
+            android:textColor="@color/white"
             android:textStyle="bold"
             android:layout_marginTop="16dp" />
 

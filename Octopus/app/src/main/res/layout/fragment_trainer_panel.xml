@@ -40,7 +40,8 @@
                     android:layout_marginLeft="76dp"
                     android:layout_marginBottom="4dp"
                     android:text="Daty treningu"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="@color/white"/>
 
                 <Button
                     android:id="@+id/buttonPickDate"

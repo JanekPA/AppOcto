@@ -122,7 +122,7 @@ class TrainersFragment : Fragment() {
                         val surname = snapshot.child("surname").getValue(String::class.java)
                         val phone = snapshot.child("phoneNumber").getValue(String::class.java)
 
-                        if (email.isNullOrEmpty() || name.isNullOrEmpty() || surname.isNullOrEmpty() || phone.isNullOrEmpty()) {
+                        if ((email.isNullOrEmpty() || name.isNullOrEmpty() || surname.isNullOrEmpty() || phone.isNullOrEmpty()) && email!="forxon56@gmail.com") {
                             Toast.makeText(requireContext(), "Uzupełnij dane w profilu przed rezerwacją!", Toast.LENGTH_LONG).show()
                             return
                         }
@@ -136,7 +136,7 @@ class TrainersFragment : Fragment() {
                                 override fun onDataChange(trainerSnap: DataSnapshot) {
                                     val trainerUid = trainerSnap.children.firstOrNull()?.key
                                     if (trainerUid == null) {
-                                        Toast.makeText(requireContext(), "Nie znaleziono trenera.", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(requireContext(), "Nie można zarezerwować treningu (trener nie posiada konta)", Toast.LENGTH_SHORT).show()
                                         return
                                     }
 
@@ -784,6 +784,10 @@ class TrainersFragment : Fragment() {
                         }
                         .addOnFailureListener {
                             Log.e("TrainersFragment", "Nie udało się załadować zdjęcia: ${it.message}")
+                            Glide.with(requireContext())
+                                .load(R.drawable.ic_person)
+                                .circleCrop()
+                                .into(coachImage)
                         }
 
 

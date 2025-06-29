@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Data"
+        android:textColor="@color/white"
         android:textSize="18sp"
         android:textStyle="bold"
         android:gravity="center"
@@ -49,7 +50,10 @@
         android:id="@+id/day_note_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Notatki do dnia" />
+        android:hint="Notatki do dnia"
+        android:textColorHint="@color/white"
+        android:textColor="@color/white"
+        />
 
     <Button
         android:id="@+id/save_note_button"

@@ -104,8 +104,8 @@ class TrainersFragment : Fragment() {
                 val role = snapshot.getValue(String::class.java)
                 if (role == "admin") {
                     addTrainerButton.visibility = View.VISIBLE
-                    editTrainerButton.visibility = View.VISIBLE
-                    addHoursButton.visibility = View.VISIBLE
+                    //editTrainerButton.visibility = View.VISIBLE
+                    //addHoursButton.visibility = View.VISIBLE
                 }
             }
         }
@@ -136,7 +136,11 @@ class TrainersFragment : Fragment() {
                                 override fun onDataChange(trainerSnap: DataSnapshot) {
                                     val trainerUid = trainerSnap.children.firstOrNull()?.key
                                     if (trainerUid == null) {
-                                        Toast.makeText(requireContext(), "Nie można zarezerwować treningu (trener nie posiada konta)", Toast.LENGTH_SHORT).show()
+                                        AlertDialog.Builder(requireContext())
+                                            .setTitle("Rezerwacja niedostępna")
+                                            .setMessage("Nie można zarezerwować treningu poprzez aplikację. Trener poglądowy nie posiada konta. Umów się poprzez kontakt.")
+                                            .setPositiveButton("OK", null)
+                                            .show()
                                         return
                                     }
 

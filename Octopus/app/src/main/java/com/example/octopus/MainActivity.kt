@@ -176,7 +176,9 @@ class MainActivity : AppCompatActivity() {
 
         notificationListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val count = snapshot.children.count()
+                val count = snapshot.children.count {
+                    it.child("title").exists() && it.child("message").exists()
+                }
                 if (count > 0) {
                     badgeTextView.visibility = View.VISIBLE
                     badgeTextView.text = if (count > 99) "99+" else count.toString()
